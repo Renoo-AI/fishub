@@ -1,8 +1,27 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/v/:target/:slug", "destination": "/templates/:target/index.html" },
-    { "source": "/api/exfil", "destination": "/api/exfil.js" },
-    { "source": "/", "destination": "/public/index.html" }
+    {
+      "source": "/api/generate",
+      "destination": "/api/generate.js"
+    },
+    {
+      "source": "/api/process",
+      "destination": "/api/process.js"
+    },
+    {
+      "source": "/v/:template/:slug",
+      "destination": "/templates/:template/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" }
+      ]
+    }
   ]
 }
